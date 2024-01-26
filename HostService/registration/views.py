@@ -173,7 +173,9 @@ def step6_view(request, registration_id):
 def step7_view(request, registration_id):
     try:
         # Fetch Step 2 data from the session
-        step7_data = request.session.get('step7_data', {})
+        # step7_data = request.session.get('step7_data', {})
+        step7_data = request.data
+        
 
         if request.method == 'GET':
             # Validate and serialize the data

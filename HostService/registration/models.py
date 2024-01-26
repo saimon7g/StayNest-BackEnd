@@ -74,4 +74,9 @@ class PropertyStep7(models.Model):
     registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='step7')
     selected_dates = models.JSONField()
 
-    
+
+
+class SelectedDate(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    property_step7 = models.ForeignKey(PropertyStep7, on_delete=models.CASCADE, related_name='selected_dates_reverse')

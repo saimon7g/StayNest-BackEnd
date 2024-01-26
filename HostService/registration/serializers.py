@@ -1,7 +1,10 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Location, SomeBasics, RegularAmenities, StandoutAmenities, Photo,PropertyRegistration, PropertyStep2, PropertyStep3, PropertyStep4, MealOption, PropertyStep5, PayingGuest, PropertyStep7
-
+from .models import( Location, SomeBasics, RegularAmenities, StandoutAmenities, Photo,
+                    PropertyRegistration, PropertyStep2, PropertyStep3, PropertyStep4,
+                      MealOption, PropertyStep5, PayingGuest, PropertyStep7,
+                      SelectedDate
+)
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
@@ -124,8 +127,25 @@ class PayingGuestSerializer(serializers.ModelSerializer):
         model = PayingGuest
         fields = '__all__'
 
+class SelectedDateSerializer(serializers.ModelSerializer):
+    start_date = serializers.DateField(format='%Y-%m-%d')
+    end_date = serializers.DateField(format='%Y-%m-%d')
+    class Meta:
+        model = SelectedDate
+        fields = ['start_date', 'end_date']
+
 class PropertyStep7Serializer(serializers.ModelSerializer):
-    selected_dates = serializers.JSONField()
+    selected_dates = SelectedDateSerializer(many=True)
+
     class Meta:
         model = PropertyStep7
         fields = '__all__'
+
+    def create(self, validated_data):
+        selected_dates_data = validated_data.pop('selected_dates')
+        property_step7 = PropertyStep7.objects.create(**validated_data)
+
+        for selected_date_data in selected_dates_data:
+            SelectedDate.objects.create(property_step7=property_step7, **selected_date_data)
+
+        return property_step7
