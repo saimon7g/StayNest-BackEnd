@@ -190,10 +190,10 @@ def step7_view(request, registration_id):
         elif request.method == 'PUT':
             # Write data for previous steps to the database
             # Step 2
-            # step2_data=request.session['step2_data']
-            # # step2_data['registration_id'] =registration_id
-            # print(step2_data)
-            # serializer_step2 = PropertyStep2Serializer(data=step2_data)
+            step2_data=request.session['step2_data']
+            # step2_data['registration_id'] =registration_id
+            print(step2_data)
+            serializer_step2 = PropertyStep2Serializer(data=step2_data)
             
             # if serializer_step2.is_valid():
             #     serializer_step2.save()
@@ -247,12 +247,12 @@ def step7_view(request, registration_id):
 
 
             # Step 7
-            step7_data['registration_id'] = registration_id
-            serializer_step7 = PropertyStep7Serializer(data=step7_data)
-            if serializer_step7.is_valid():
-                serializer_step7.save()
-            else:
-                return Response(serializer_step7.errors, status=status.HTTP_400_BAD_REQUEST)
+            # step7_data['registration_id'] = registration_id
+            # serializer_step7 = PropertyStep7Serializer(data=step7_data)
+            # if serializer_step7.is_valid():
+            #     serializer_step7.save()
+            # else:
+            #     return Response(serializer_step7.errors, status=status.HTTP_400_BAD_REQUEST)
 
             # # Optionally, you can clear the session data for all steps after saving to the database
             # del request.session['step1_data']
