@@ -57,7 +57,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-
+# Allow CORS for all domains and all paths
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'HostService.urls'
 
 TEMPLATES = [
