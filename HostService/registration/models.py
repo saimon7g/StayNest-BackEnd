@@ -70,13 +70,14 @@ class PayingGuest(models.Model):  # Step 6
     meal_price = models.DecimalField(max_digits=10, decimal_places=2)
     photo = models.URLField()
 
-class PropertyStep7(models.Model):
-    registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='step7')
-    selected_dates = models.JSONField()
-
-
-
 class SelectedDate(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
-    property_step7 = models.ForeignKey(PropertyStep7, on_delete=models.CASCADE, related_name='selected_dates_reverse')
+
+
+class PropertyStep7(models.Model):
+    registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='step7')
+    selected_dates =  models.ManyToManyField(SelectedDate, related_name='selected_dates')
+
+
+
