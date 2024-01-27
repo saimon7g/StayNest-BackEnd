@@ -126,26 +126,24 @@ class PayingGuestSerializer(serializers.ModelSerializer):
     class Meta:
         model = PayingGuest
         fields = '__all__'
-
 class SelectedDateSerializer(serializers.ModelSerializer):
-    start_date = serializers.DateField(format='%Y-%m-%d')
-    end_date = serializers.DateField(format='%Y-%m-%d')
     class Meta:
         model = SelectedDate
-        fields = ['start_date', 'end_date']
+        fields = ["start_date","end_date"]
 
 class PropertyStep7Serializer(serializers.ModelSerializer):
     selected_dates = SelectedDateSerializer(many=True)
 
     class Meta:
         model = PropertyStep7
-        fields = '__all__'
+        fields = ['registration_id', 'selected_dates']
 
     def create(self, validated_data):
         selected_dates_data = validated_data.pop('selected_dates')
         property_step7 = PropertyStep7.objects.create(**validated_data)
 
         for selected_date_data in selected_dates_data:
-            SelectedDate.objects.create(property_step7=property_step7, **selected_date_data)
+            selected_date=SelectedDate.objects.create( **selected_date_data)
+            getattr(property_step7, 'selected_dates').add(selected_date)
 
         return property_step7
