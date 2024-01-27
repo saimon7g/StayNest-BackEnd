@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-@x9h!nrqa^cnws)mx!&i^4@)&)97ifz9)tf#s1_!#t7w9@62vq
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+#APPEND_SLASH = False
 #supabase 
 SUPABASE_URL = 'https://bwjcxlzashfwvbdmhent.supabase.co'
 SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3amN4bHphc2hmd3ZiZG1oZW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU4MjczNDYsImV4cCI6MjAyMTQwMzM0Nn0.JEf-Mjzy_Pjaq1lQoyTNuCR1T-RoQYDC6aY_9zPh3nU'
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     
     'corsheaders',# CORS
     'rest_framework',# REST
+    'rest_framework.authtoken',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Handler',# Handler
+
 ]
 
 MIDDLEWARE = [
@@ -90,8 +92,12 @@ WSGI_APPLICATION = 'APIGateWay.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.kkkridwaybvihynzddyf',
+        'PASSWORD': 'stayNest12@12',
+        'HOST': 'aws-0-us-west-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
+        'PORT': '6543',        # Default PostgreSQL port
     }
 }
 

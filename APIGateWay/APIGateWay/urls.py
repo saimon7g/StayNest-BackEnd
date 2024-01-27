@@ -18,13 +18,9 @@ from django.contrib import admin
 from django.urls import path,include
 from django.views.generic import RedirectView
 
-def custom_redirect(request, path):
-    # Construct the target URL by appending the original path to http://localhost:8080/
-    target_url = f'http://localhost:8080/{path}'
-    return RedirectView.as_view(url=target_url)(request)
 
 urlpatterns = [
     path('admin/', admin.site.urls),# admin
-    path('host/<path:path>/', custom_redirect, name='custom_redirect'),
+    path('auth/',include('auth.urls')),
     path('', include('Handler.urls')),# Handler
 ]

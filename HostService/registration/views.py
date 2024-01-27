@@ -13,6 +13,9 @@ from .serializers import (PropertyRegistrationSerializer,LocationSerializer,Some
                           PropertyStep7Serializer)
 
 
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import  authentication_classes, permission_classes
 # Step 1 Views
 def ok_view(request):
      return JsonResponse({"message": "Step ok view"})
@@ -21,7 +24,7 @@ def ok_view(request):
 @api_view(['GET', 'POST'])
 def step1_view(request):
     if request.method == 'GET':
-        return Response({"message": "This is a GET request."}, status=status.HTTP_200_OK)
+        return Response({"message": "This is a GET request."}, status=status.HTTP_201_CREATED)
     elif request.method == 'POST':
         try:
             data = request.data
@@ -38,7 +41,7 @@ def step1_view(request):
             traceback_str = traceback.format_exc()
             return Response({"error": str(e), "traceback": traceback_str}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step2_view(request, registration_id):
     try:    
@@ -68,7 +71,7 @@ def step2_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step3_view(request, registration_id):
     try:    
@@ -97,7 +100,7 @@ def step3_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step4_view(request, registration_id):
     try:    
@@ -127,7 +130,7 @@ def step4_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
     
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step5_view(request, registration_id):
     try:    
@@ -157,7 +160,7 @@ def step5_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step6_view(request, registration_id):
     try:    
@@ -284,3 +287,10 @@ def step7_view(request, registration_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@csrf_exempt 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed!")
