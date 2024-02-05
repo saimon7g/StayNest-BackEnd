@@ -14,7 +14,7 @@ from .serializers import (PropertyRegistrationSerializer,LocationSerializer,Some
 
 
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.decorators import  authentication_classes, permission_classes
 
 from rest_framework.authtoken.models import Token
@@ -24,64 +24,66 @@ import json
 def ok_view(request):
      return JsonResponse({"message": "Step ok view"})
 
-@csrf_exempt
-@permission_classes([IsAuthenticated])
+class IsHostGroup(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name='host').exists()
+
 @api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def step1_view(request):
     if request.method == 'GET':
         try:
-            auth_header = request.headers.get('Authorization')
-            # print(auth_header)
-            # if auth_header and auth_header.startswith('Token '):
-            # # Extract the token from the Authorization header
-            #     token_key = auth_header.split(' ')[1]
-            #     token = Token.objects.get(key=token_key)
-            # # Extract the user ID from the Token object
-            #     user_id = token.user.id
+            # Allow any authenticated user to make a GET request
             return Response({"message": "This is a GET request",}, status=status.HTTP_200_OK)
         except:
-            return Response({"header ":auth_header})
-        
+            return Response({"error": "Error processing GET request"})
+
     elif request.method == 'POST':
-        print('line 45--')
-        
-        # data=json.dumps(request.data)
-        data=request.data
-        print(type(request.data))
-        # data_dict = {key: data.getlist(key)[0] for key in data.keys()}
-        # print("JSON",data_dict)
-        
         try:
-            # auth_header = request.headers.get('Authorization')
+            auth_header = request.headers.get('Authorization')
 
-            # if auth_header and auth_header.startswith('Token '):
-            # # Extract the token from the Authorization header
-            #     token_key = auth_header.split(' ')[1]
-            #     token = Token.objects.get(key=token_key)
-            #     print(token)
-            # # # Extract the user ID from the Token object
-            # user_id = 4
+            if auth_header and auth_header.startswith('Token '):
+                # Extract the token from the Authorization header
+                token_key = auth_header.split(' ')[1]
 
-            
-            
-            
-            
+                try:
+                    # Retrieve the Token object using the token key
+                    token = Token.objects.get(key=token_key)
 
-            serializer = PropertyRegistrationSerializer(data=data)      
-            if serializer.is_valid():
-                step1_instance = serializer.save()
-                return Response({"registration_id": step1_instance.registration_id, "message": "Property registration step 1 completed."}, status=status.HTTP_201_CREATED)
+                    # Assuming Token model has a user foreign key field named 'user'
+                    user_id = token.user.id
+
+                    # Check if the user is in the 'host' group
+                    if token.user.groups.filter(name='host').exists():
+                        serializer = PropertyRegistrationSerializer(data={**request.data, 'user': user_id})
+
+                        if serializer.is_valid():
+                            step1_instance = serializer.save()
+                            return Response({"registration_id": step1_instance.registration_id, "message": "Property registration step 1 completed."}, status=status.HTTP_201_CREATED)
+                        else:
+                            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        # User is authenticated, but not in the 'host' group
+                        print('---- not host')
+                        return Response({"error": "User does not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+                except Token.DoesNotExist:
+                    # Handle the case where the token is not found
+                    return Response({"error": "Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                # Authentication header is missing or invalid
+                return Response({"error": "Authentication required. Please log in."}, status=status.HTTP_401_UNAUTHORIZED)
 
         except Exception as e:
             import traceback
             traceback_str = traceback.format_exc()
-            print("from line 70")
+            print("Error processing POST request")
             return Response({"error": str(e), "traceback": traceback_str}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step2_view(request, registration_id):
     try:    
         if request.method == 'GET':
@@ -109,9 +111,10 @@ def step2_view(request, registration_id):
             return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step3_view(request, registration_id):
     try:    
         if request.method == 'GET':
@@ -141,6 +144,8 @@ def step3_view(request, registration_id):
 
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step4_view(request, registration_id):
     try:    
         if request.method == 'GET':
@@ -171,6 +176,8 @@ def step4_view(request, registration_id):
     
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step5_view(request, registration_id):
     try:    
         if request.method == 'GET':
@@ -198,9 +205,10 @@ def step5_view(request, registration_id):
             return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step6_view(request, registration_id):
     try:    
         if request.method == 'GET':
@@ -227,6 +235,8 @@ def step6_view(request, registration_id):
 
 @csrf_exempt
 @api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated, IsHostGroup])
 def step7_view(request, registration_id):
     try:
         step7_data = request.data

@@ -29,10 +29,11 @@ class RegularAmenities(models.Model):
 class StandoutAmenities(models.Model):
     name = models.CharField(max_length=255)
 
-class Photo(models.Model):
-    url = models.URLField()
-    description = models.TextField()
 
+class Photo(models.Model):
+    description = models.TextField()
+    image_data = models.TextField(blank=True, null=True) 
+    
 class PropertyStep2(models.Model):
     registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='step2')
     regular_amenities = models.ManyToManyField(RegularAmenities)
