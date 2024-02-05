@@ -450,3 +450,4 @@ cython_debug/
 # ignore all local .env files
 .env*
 myenv
+*.sh
