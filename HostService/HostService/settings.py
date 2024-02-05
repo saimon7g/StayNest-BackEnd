@@ -56,17 +56,14 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "http://localhost:8080",
-    "http://127.0.0.1:8080",  
     "http://localhost:8000",
-    "http://127.0.0.1:8000",
+
 ]
 
 # Allow CORS for all domains and all paths
 CORS_ALLOW_ALL_ORIGINS = True
-
-
+SESSION_KEY_SECURE = False
 ROOT_URLCONF = 'HostService.urls'
 
 TEMPLATES = [

@@ -38,3 +38,19 @@ def login(request):
 @permission_classes([IsAuthenticated])
 def test_token(request):
     return Response("passed!")
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def logout(request):
+    # Delete the authentication token associated with the user
+    if 'auth_token' in request.session:
+        auth_token = request.session.pop('auth_token', None)
+        if auth_token:
+            try:
+                token = Token.objects.get(key=auth_token)
+                token.delete()
+            except Token.DoesNotExist:
+                pass  # Token not found, but continue with logout
+
+    return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)

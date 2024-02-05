@@ -19,6 +19,7 @@ from rest_framework.decorators import  authentication_classes, permission_classe
 
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+import json
 # Step 1 Views
 def ok_view(request):
      return JsonResponse({"message": "Step ok view"})
@@ -29,7 +30,7 @@ def ok_view(request):
 def step1_view(request):
     if request.method == 'GET':
         try:
-            # auth_header = request.headers.get('Authorization')
+            auth_header = request.headers.get('Authorization')
             # print(auth_header)
             # if auth_header and auth_header.startswith('Token '):
             # # Extract the token from the Authorization header
@@ -42,21 +43,30 @@ def step1_view(request):
             return Response({"header ":auth_header})
         
     elif request.method == 'POST':
+        print('line 45--')
+        
+        # data=json.dumps(request.data)
+        data=request.data
+        print(type(request.data))
+        # data_dict = {key: data.getlist(key)[0] for key in data.keys()}
+        # print("JSON",data_dict)
+        
         try:
-            auth_header = request.headers.get('Authorization')
+            # auth_header = request.headers.get('Authorization')
 
             # if auth_header and auth_header.startswith('Token '):
             # # Extract the token from the Authorization header
             #     token_key = auth_header.split(' ')[1]
- 
-            # token = Token.objects.get(key=token_key)
-            # # Extract the user ID from the Token object
-            user_id = 4
+            #     token = Token.objects.get(key=token_key)
+            #     print(token)
+            # # # Extract the user ID from the Token object
+            # user_id = 4
 
-            data = request.data
-            if "user" not in data:
-                data["user"] = 4
-            print(data)
+            
+            
+            
+            
+
             serializer = PropertyRegistrationSerializer(data=data)      
             if serializer.is_valid():
                 step1_instance = serializer.save()
@@ -67,6 +77,7 @@ def step1_view(request):
         except Exception as e:
             import traceback
             traceback_str = traceback.format_exc()
+            print("from line 70")
             return Response({"error": str(e), "traceback": traceback_str}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @csrf_exempt
