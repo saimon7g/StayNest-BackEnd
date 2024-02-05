@@ -1,0 +1,31 @@
+# version : '3'
+
+# services:
+#   backend:
+#     build:
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - .:/APIGateWay
+
+version: '3'
+
+services:
+  project1:
+    build: ./APIGateWay
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./project1:/app/project1
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  project2:
+    build:
+      context: .
+      dockerfile: Dockerfile_project2
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./project2:/app/project2
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8080"]
