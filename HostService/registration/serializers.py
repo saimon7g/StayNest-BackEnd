@@ -147,3 +147,49 @@ class PropertyStep7Serializer(serializers.ModelSerializer):
             getattr(property_step7, 'selected_dates').add(selected_date)
 
         return property_step7
+    
+
+    # serializers.py
+
+
+class CompleteRegistrationSerializer(serializers.ModelSerializer):
+    step2 = serializers.SerializerMethodField()
+    step3 = serializers.SerializerMethodField()
+    step4 = serializers.SerializerMethodField()
+    step5 = serializers.SerializerMethodField()
+    paying_guest = serializers.SerializerMethodField()
+    step7 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PropertyRegistration
+        fields = '__all__'
+
+    def get_step2(self, obj):
+        step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
+        serializer = PropertyStep2Serializer(step2_instance)
+        return serializer.data
+
+    def get_step3(self, obj):
+        step3_instance = PropertyStep3.objects.get(registration_id=obj.registration_id)
+        serializer = PropertyStep3Serializer(step3_instance)
+        return serializer.data
+
+    def get_step4(self, obj):
+        step4_instance = PropertyStep4.objects.get(registration_id=obj.registration_id)
+        serializer = PropertyStep4Serializer(step4_instance)
+        return serializer.data
+
+    def get_step5(self, obj):
+        step5_instance = PropertyStep5.objects.get(registration_id=obj.registration_id)
+        serializer = PropertyStep5Serializer(step5_instance)
+        return serializer.data
+
+    def get_paying_guest(self, obj):
+        paying_guest_instance = PayingGuest.objects.get(registration_id=obj.registration_id)
+        serializer = PayingGuestSerializer(paying_guest_instance)
+        return serializer.data
+
+    def get_step7(self, obj):
+        step7_instance = PropertyStep7.objects.get(registration_id=obj.registration_id)
+        serializer = PropertyStep7Serializer(step7_instance)
+        return serializer.data

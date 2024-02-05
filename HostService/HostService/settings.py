@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'registration',
 ]
 
@@ -96,6 +97,7 @@ WSGI_APPLICATION = 'HostService.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+# APPEND_SLASH = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

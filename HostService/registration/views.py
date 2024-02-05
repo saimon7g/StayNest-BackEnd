@@ -10,21 +10,52 @@ from rest_framework import status
 from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertyStep4,PropertyStep5,PayingGuest,PropertyStep7)
 from .serializers import (PropertyRegistrationSerializer,LocationSerializer,SomeBasicsSerializer,PropertyStep2Serializer,
                           PropertyStep3Serializer,PropertyStep4Serializer,PropertyStep5Serializer,PayingGuestSerializer,
-                          PropertyStep7Serializer)
+                          PropertyStep7Serializer,CompleteRegistrationSerializer)
 
 
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import  authentication_classes, permission_classes
+
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 # Step 1 Views
 def ok_view(request):
      return JsonResponse({"message": "Step ok view"})
 
 @csrf_exempt
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'POST'])
 def step1_view(request):
     if request.method == 'GET':
-        return Response({"message": "This is a GET request."}, status=status.HTTP_200_OK)
+        try:
+            # auth_header = request.headers.get('Authorization')
+            # print(auth_header)
+            # if auth_header and auth_header.startswith('Token '):
+            # # Extract the token from the Authorization header
+            #     token_key = auth_header.split(' ')[1]
+            #     token = Token.objects.get(key=token_key)
+            # # Extract the user ID from the Token object
+            #     user_id = token.user.id
+            return Response({"message": "This is a GET request",}, status=status.HTTP_200_OK)
+        except:
+            return Response({"header ":auth_header})
+        
     elif request.method == 'POST':
         try:
+            auth_header = request.headers.get('Authorization')
+
+            # if auth_header and auth_header.startswith('Token '):
+            # # Extract the token from the Authorization header
+            #     token_key = auth_header.split(' ')[1]
+ 
+            # token = Token.objects.get(key=token_key)
+            # # Extract the user ID from the Token object
+            user_id = 4
+
             data = request.data
+            if "user" not in data:
+                data["user"] = 4
             print(data)
             serializer = PropertyRegistrationSerializer(data=data)      
             if serializer.is_valid():
@@ -38,7 +69,7 @@ def step1_view(request):
             traceback_str = traceback.format_exc()
             return Response({"error": str(e), "traceback": traceback_str}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step2_view(request, registration_id):
     try:    
@@ -68,7 +99,7 @@ def step2_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step3_view(request, registration_id):
     try:    
@@ -93,11 +124,11 @@ def step3_view(request, registration_id):
             # Save the data in the session
             request.session['step3_data'] = data
 
-            return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
+            return Response({"message": "Property registration step 3 done", "data": data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step4_view(request, registration_id):
     try:    
@@ -127,7 +158,7 @@ def step4_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
     
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step5_view(request, registration_id):
     try:    
@@ -157,7 +188,7 @@ def step5_view(request, registration_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
-
+@csrf_exempt
 @api_view(['GET', 'PUT'])
 def step6_view(request, registration_id):
     try:    
@@ -236,7 +267,7 @@ def step7_view(request, registration_id):
                 serializer_step4.save()
             else:
                 print('error ',step4_data)
-                return Response(serializer_step4.errors, status=status.HTTP_400_BAD_REQUEST)
+                # return Response(serializer_step4.errors, status=status.HTTP_400_BAD_REQUEST)
 
             # Step 5
             step5_data=request.session['step5_data']
@@ -248,8 +279,9 @@ def step7_view(request, registration_id):
                     
                     print('data paiso??')
                     serializer_step5.save()
-                else: 
-                    return Response(serializer_step5.errors, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    print('rror') 
+                    # return Response(serializer_step5.errors, status=status.HTTP_400_BAD_REQUEST)
             # Step 6
             step6_data=request.session['step6_data']
             if step6_data:
@@ -284,3 +316,20 @@ def step7_view(request, registration_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@csrf_exempt 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed!")
+
+@api_view(['GET'])
+def complete_registration_view(request, registration_id):
+    try:
+        registration_instance = PropertyRegistration.objects.get(registration_id=registration_id)
+    except PropertyRegistration.DoesNotExist:
+        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = CompleteRegistrationSerializer(registration_instance)
+    return Response(serializer.data)
