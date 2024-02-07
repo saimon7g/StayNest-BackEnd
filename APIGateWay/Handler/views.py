@@ -48,10 +48,10 @@ class RedirectHostView(APIView):
         if auth_token is not None:
             # Use the token in subsequent requests
             headers = {'Authorization': f'Token {auth_token}'}
-            headers['Content-Type']='application/json'
+           
         else:
             headers = {}
-
+        headers['Content-Type']='application/json'
         target_url = f'http://localhost:8080/{path}/'
 
         try:
@@ -60,8 +60,8 @@ class RedirectHostView(APIView):
             # response = requests.request(request.method, target_url, headers=headers, data=request.data)
             # data = json.dumps(request.data)
             data=request.data
-            print('req data',data)
-            response = requests.request(request.method, target_url, headers=headers, json=data)
+            # print('req header',request.headers)
+            response = requests.request(request.method, target_url, headers=request.headers, json=data)
 
             # Check if the request was successful (status code 2xx)
             if response.status_code // 100 == 2:
