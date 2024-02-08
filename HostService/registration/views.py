@@ -357,8 +357,24 @@ def complete_registration_view(request, registration_id):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-#stayWithMeal
-def stay_with_meal(request):
-    # Retrieve properties with step5 not null
-    properties_with_meal = PropertyRegistration.objects.filter(step5__isnull=False)
-    return Response({"message": "Stay with meal"})
+#  search_properties_view, name='search_properties'),
+def search_properties_view(request):
+        
+        return Response({"Message":"step1_detail_view"})
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+#  search_properties_view, name='search_properties'),
+def property_details_view(request):
+    
+    return Response({"Message":"property_detail_view"})
+  
+@api_view(['GET'])
+@permission_classes([AllowAny])
+#  search_properties_view, name='search_properties'),
+def step1_detail_view(request,registration_id):
+    
+    return Response({"Message":"step1_detail_view"})
+    
