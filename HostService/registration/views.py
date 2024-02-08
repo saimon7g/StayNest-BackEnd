@@ -354,3 +354,11 @@ def complete_registration_view(request, registration_id):
 
     serializer = CompleteRegistrationSerializer(registration_instance)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+#stayWithMeal
+def stay_with_meal(request):
+    # Retrieve properties with step5 not null
+    properties_with_meal = PropertyRegistration.objects.filter(step5__isnull=False)
+    return Response({"message": "Stay with meal"})
