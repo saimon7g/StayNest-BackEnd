@@ -56,7 +56,7 @@ class RedirectHostView(APIView):
 
         try:
             # Make a request with custom headers
-            print(request.data)
+            print('Request---data---',request.data)
             # response = requests.request(request.method, target_url, headers=headers, data=request.data)
             # data = json.dumps(request.data)
             data=request.data
@@ -68,7 +68,7 @@ class RedirectHostView(APIView):
                 return Response(response.json(), status=response.status_code)
             else:
                 # Handle non-successful response
-                return Response(response.json(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(response.json(), status=response.status_code)
             
         except requests.RequestException as e:
             # Handle request exception

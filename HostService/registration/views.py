@@ -93,6 +93,8 @@ def step2_view(request, registration_id):
                 serializer = PropertyStep2Serializer(data=step2_data_session)
                 if serializer.is_valid():
                     return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             # If step2 data is not in the session, check if it's in the database
             try:
                 property_step2 = PropertyStep2.objects.get(registration_id=registration_id)
@@ -103,14 +105,28 @@ def step2_view(request, registration_id):
                 return Response({"error": "Property step2 data not found."}, status=status.HTTP_404_NOT_FOUND)
         elif request.method == 'PUT':
             data = request.data
-            data['registration_id'] = registration_id  
+            data['registration_id'] = registration_id
+            try:
+                # Check if entry exists
+                property_step2 = PropertyStep2.objects.get(registration_id=registration_id)
+                property_step2.delete()  # Delete existing entry
+            except PropertyStep2.DoesNotExist:
+                pass  # Entry does not exist, proceed to create a new one
 
-            # Save the data in the session
-            request.session['step2_data'] = data
+            serializer = PropertyStep2Serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "Property registration step 2 updated successfully"}, status=200)
+            else:
+                return JsonResponse(serializer.errors, status=400)
 
-            return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
+        else:
+            
+            return Response({"error": "Invalid request method. Only GET/ PUT is allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+        print('error',e)
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
 @csrf_exempt
 @api_view(['GET', 'PUT'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -119,6 +135,7 @@ def step3_view(request, registration_id):
     try:    
         if request.method == 'GET':
             step3_data_session = request.session.get('step3_data', {})
+            print('step3_data_session',step3_data_session)
             if step3_data_session:
                 serializer = PropertyStep3Serializer(data=step3_data_session)
                 if serializer.is_valid():
@@ -134,11 +151,19 @@ def step3_view(request, registration_id):
         elif request.method == 'PUT':
             data = request.data
             data['registration_id'] = registration_id  
+            try:
+                # Check if entry exists
+                property_step3 = PropertyStep3.objects.get(registration_id=registration_id)
+                property_step3.delete()  # Delete existing entry
+            except PropertyStep3.DoesNotExist:
+                pass  # Entry does not exist, proceed to create a new one
 
-            # Save the data in the session
-            request.session['step3_data'] = data
-
-            return Response({"message": "Property registration step 3 done", "data": data}, status=status.HTTP_200_OK)
+            serializer = PropertyStep3Serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "Property registration step 2 updated successfully"}, status=200)
+            else:
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
@@ -164,13 +189,23 @@ def step4_view(request, registration_id):
                 # If step4 data is not in the session or database, return an error
                 return Response({"error": "Property step4 data not found."}, status=status.HTTP_404_NOT_FOUND)
         elif request.method == 'PUT':
+
+           
             data = request.data
             data['registration_id'] = registration_id  
+            try:
+                # Check if entry exists
+                property_step4 = PropertyStep4.objects.get(registration_id=registration_id)
+                property_step4.delete()  # Delete existing entry
+            except PropertyStep4.DoesNotExist:
+                pass  # Entry does not exist, proceed to create a new one
 
-            # Save the data in the session
-            request.session['step4_data'] = data
-
-            return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
+            serializer = PropertyStep4Serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "Property registration step 4 updated successfully"}, status=200)
+            else:
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
     
@@ -226,10 +261,23 @@ def step6_view(request, registration_id):
             except PayingGuest.DoesNotExist:
                 return Response({"error": "Property step6 data not found."}, status=status.HTTP_404_NOT_FOUND)
         elif request.method == 'PUT':
+
             data = request.data
             data['registration_id'] = registration_id  
-            request.session['step6_data'] = data
-            return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
+            try:
+                # Check if entry exists
+                property_step6 = PayingGuest.objects.get(registration_id=registration_id)
+                property_step6.delete()  # Delete existing entry
+            except PayingGuest.DoesNotExist:
+                pass  # Entry does not exist, proceed to create a new one
+
+            serializer = PayingGuestSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "Property registration step 6 updated successfully"}, status=200)
+            else:
+                print('error',serializer.errors)
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
@@ -256,84 +304,22 @@ def step7_view(request, registration_id):
                 return Response({"error": "Property step7 data not found."}, status=status.HTTP_404_NOT_FOUND)
 
         elif request.method == 'PUT':
-            # Write data for previous steps to the database
-            # Step 2
-            step2_data=request.session['step2_data']
-            # step2_data['registration_id'] =registration_id
-            # print(step2_data)
-            serializer_step2 = PropertyStep2Serializer(data=step2_data)
-            
-            if serializer_step2.is_valid():
-                serializer_step2.save()
+            data = request.data
+            data['registration_id'] = registration_id
+            try:
+                # Check if entry exists
+                property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
+                property_step7.delete()  # Delete existing entry
+            except PropertyStep7.DoesNotExist:
+                pass
+            serializer = PropertyStep7Serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                PropertyRegistration.objects.get(registration_id=registration_id).mark_as_completed()
+                return JsonResponse({"message": "Property registration step 7 updated successfully"}, status=200)
             else:
-                print('not valid 2')
-                print(serializer_step2.errors)
-                
-
-            # Step 3
-            step3_data=request.session['step3_data']
-            step3_data['registration_id'] = registration_id
-            serializer_step3 = PropertyStep3Serializer(data=step3_data)
-            if serializer_step3.is_valid():
-                serializer_step3.save()
-            else:
-                print('not valid 3')
-                
-                print(serializer_step3.errors)
-            # Step 4
-            step4_data=request.session['step4_data']
-            step4_data['registration_id'] = registration_id
-            serializer_step4 = PropertyStep4Serializer(data=step4_data)
-            if serializer_step4.is_valid():
-                serializer_step4.save()
-            else:
-                print('error ',step4_data)
-                # return Response(serializer_step4.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            # Step 5
-            step5_data=request.session['step5_data']
-            if step5_data:
-                step5_data['registration_id'] = registration_id
-                # print(step5_data)
-                serializer_step5 = PropertyStep5Serializer(data=step5_data)
-                if serializer_step5.is_valid():
-                    
-                    print('data paiso??')
-                    serializer_step5.save()
-                else:
-                    print('rror') 
-                    # return Response(serializer_step5.errors, status=status.HTTP_400_BAD_REQUEST)
-            # Step 6
-            step6_data=request.session['step6_data']
-            if step6_data:
-                step6_data['registration_id'] = registration_id
-                serializer_step6 = PayingGuestSerializer(data=step6_data)
-                if serializer_step6.is_valid():
-                    serializer_step6.save()
-                else:
-                     return Response(serializer_step6.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-            # Step 7
-            request.data
-            step7_data['registration_id'] = registration_id
-            serializer_step7 = PropertyStep7Serializer(data=step7_data)
-            if serializer_step7.is_valid():
-                serializer_step7.save()
-            else:
-                return Response(serializer_step7.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            # Optionally, you can clear the session data for all steps after saving to the database
-            request.session.pop('step1_data', None)
-            request.session.pop('step2_data', None)
-            request.session.pop('step3_data', None) 
-            request.session.pop('step4_data', None)
-            request.session.pop('step5_data', None)
-            request.session.pop('step6_data', None)
-            request.session.pop('step7_data', None)
-                    
-
-            return Response({"message": "Property registration steps 1 to 7 done"}, status=status.HTTP_200_OK)
+                print('error',serializer.errors)
+                return JsonResponse(serializer.errors, status=400)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
