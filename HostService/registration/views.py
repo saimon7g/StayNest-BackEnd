@@ -7,10 +7,13 @@ from django.views.decorators.http import require_GET, require_POST
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertyStep4,PropertyStep5,PayingGuest,PropertyStep7)
+from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertyStep4,PropertyStep5,PayingGuest,
+                     PropertyStep7,SelectedDate,PropertyReview,Host,Location)
 from .serializers import (PropertyRegistrationSerializer,LocationSerializer,SomeBasicsSerializer,PropertyStep2Serializer,
                           PropertyStep3Serializer,PropertyStep4Serializer,PropertyStep5Serializer,PayingGuestSerializer,
-                          PropertyStep7Serializer,CompleteRegistrationSerializer)
+                          PropertyStep7Serializer,CompleteRegistrationSerializer,ConcisePropertySerializer,SelectedDateSerializer,
+                          DetailedPropertySerializer,PayingGuestSerializer,PropertyReviewSerializer,HostSerializer)
+                          
 
 
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -20,7 +23,51 @@ from rest_framework.decorators import  authentication_classes, permission_classe
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 import json
-# Step 1 Views
+from datetime import datetime,timedelta
+from django.core import serializers
+
+def update_intervals_and_mark_unavailable(arg_interval, property_step7):
+    selected_dates = property_step7.selected_dates.all()
+    print(selected_dates)
+    updated_intervals = []
+    
+    for interval in selected_dates:
+        if arg_interval.start_date >= interval.start_date and arg_interval.end_date <= interval.end_date:
+            # Split the interval
+            print('interval.start_date',interval.start_date)
+            if arg_interval.start_date > interval.start_date:
+
+                # Create a new interval for the available period before arg_interval
+                new_interval_before = SelectedDate.objects.create(start_date=interval.start_date, end_date=(arg_interval.start_date - timedelta(days=1)), status='available')
+                updated_intervals.append(new_interval_before)
+
+                
+            # Create a new interval for the unavailable period corresponding to arg_interval
+            new_interval_unavailable = SelectedDate.objects.create(start_date=arg_interval.start_date, end_date=arg_interval.end_date, status='unavailable')
+            updated_intervals.append(new_interval_unavailable)
+            
+            if arg_interval.end_date < interval.end_date:
+                # Create a new interval for the available period after arg_interval
+                new_interval_after = SelectedDate.objects.create(start_date=(arg_interval.end_date + timedelta(days=1)), end_date=interval.end_date, status='available')
+                updated_intervals.append(new_interval_after)
+                
+            # Remove the original interval from the selected_dates queryset
+            interval.delete()
+        else:
+            # If the arg_interval does not fit within the current interval, keep the interval unchanged
+            updated_intervals.append(interval)
+
+    # Add all the updated intervals to the property_step7.selected_dates
+    property_step7.selected_dates.add(*updated_intervals)
+    return True
+
+# Usage example:
+# Assuming arg_interval and property_step7 are defined elsewhere
+# update_intervals_and_mark_unavailable(arg_interval, property_step7)
+
+
+@api_view(['GET'])
+
 def ok_view(request):
      return JsonResponse({"message": "Step ok view"})
 
@@ -345,22 +392,127 @@ def complete_registration_view(request, registration_id):
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def search_properties_view(request):
-        
-        return Response({"Message":"step1_detail_view"})
+    location = request.data['location']
+    print('location',location)
+    # guests = request.GET.get('guests')
+    guests = request.data['guests']
+    room_type = request.data['room_type']
+    # Get the 'price_range' query parameter
+    price_range = request.data['price_range']
+    
+
+    # Access the 'min' and 'max' keys of the 'price_range' dictionary
+    price_range_min = price_range['min']    
+    price_range_max = price_range['max']
+    category = request.GET.get('category', 'any')
+    check_in = datetime.strptime(request.data['check_in'], '%Y-%m-%d').date()
+    check_out = datetime.strptime(request.data['check_out'], '%Y-%m-%d').date()
+
+    # Get properties with selected dates that overlap with the given check-in and check-out dates
+    properties = PropertyRegistration.objects.filter(
+        status='completed',
+        location__selected_location=location, 
+        step7__selected_dates__start_date__lte=check_in,  # Selected date start before or on check-out date
+        step7__selected_dates__end_date__gte=check_out  # Selected date end after or on check-in date
+    ).distinct()  # Get distinct properties
+    serialized_properties = ConcisePropertySerializer (properties, many=True).data
+
+    property_list = []
+    for property in serialized_properties:
+        registration_id = property['property_id'] 
+        property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
+        selected_dates = property_step7.selected_dates.filter(
+            start_date__gte=check_in, end_date__lte=check_out, status='available'
+        ).order_by('start_date')
+        if selected_dates:
+            interval = selected_dates.first()
+            property['availability'] = SelectedDateSerializer(interval).data
+            property_list.append(property)
+    return Response({"results": property_list})
 
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
-def property_details_view(request):
-    
-    return Response({"Message":"property_detail_view"})
-  
+def property_details_view(request,property_id):
+    try:
+        registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
+    except PropertyRegistration.DoesNotExist:
+        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer =DetailedPropertySerializer (registration_instance)
+    return Response(serializer.data)  
 @api_view(['GET'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def step1_detail_view(request,registration_id):
     
     return Response({"Message":"step1_detail_view"})
+
+
+@api_view(['GET','POST'])
+def property_availability_view(request,property_id):
+    if request.method == 'GET':
+        try:
+            property_step7 = PropertyStep7.objects.get(registration_id=property_id)
+            serializer = PropertyStep7Serializer(property_step7)
+            return Response(serializer.data['selected_dates'], status=status.HTTP_200_OK)
+        except PropertyStep7.DoesNotExist:
+            return Response({"error": "PropertyStep7 instance not found for the provided registration_id"}, status=404)
+    if request.method == 'POST':
+        # Retrieve registration_id from request data
+        registration_id = property_id
+
+        # Fetch the PropertyStep7 instance using the registration_id
+        try:
+            property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
+        except PropertyStep7.DoesNotExist:
+            return Response({"message": "PropertyStep7 instance not found for the provided registration_id"}, status=404)
+
+        # Create a SelectedDate instance from the arg_interval data
+        arg_interval_start_date = request.data['start_date']
+        arg_interval_end_date = request.data['end_date']
+        arg_interval = SelectedDate(start_date=datetime.strptime(arg_interval_start_date, '%Y-%m-%d').date(),
+                                end_date=datetime.strptime(arg_interval_end_date, '%Y-%m-%d').date())
+
+        try:
+            update_intervals_and_mark_unavailable(arg_interval, property_step7)
+            return Response({"message": "Intervals updated successfully"})
+        except:
+            return Response({"message": "No intervals updated"})
     
+
+
+@api_view(['GET', 'POST'])
+def review_view(request, property_id):
+    # Get the property registration object
+    
+
+    if request.method == 'GET':
+        # Retrieve all reviews for the property
+        reviews = PropertyReview.objects.filter(property_id=property_id)
+        serializer = PropertyReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        # Create a new review for the property
+        serializer = PropertyReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            # Ensure the requesting user is the owner of the property
+            property_registration = PropertyRegistration.objects.get(registration_id=property_id)
+            if request.user == property_registration.user:
+                serializer.save(property_id=property_registration, user_id=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "You are not authorized to review this property."},
+                                status=status.HTTP_403_FORBIDDEN)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def profile_view(request):
+    # Retrieve host profile
+    host_profile = request.user.host
+    serializer = HostSerializer(host_profile)
+    return Response(serializer.data)

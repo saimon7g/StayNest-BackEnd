@@ -1,7 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from datetime import timedelta
 
+def get_local_time():
+    return timezone.localtime(timezone.now())
 # Create your models here.
 class GuestNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guest_notifications')
@@ -65,3 +71,19 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment ID: {self.id}, User: {self.user.username}, Booking ID: {self.booking_id}"
 
+
+class Guest(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField()
+    nid_document = models.FileField(upload_to='documents/', null=True, blank=True)
+    passport_document = models.FileField(upload_to='documents/', null=True, blank=True)
+    joined_at = models.DateTimeField(default=get_local_time)
+
+    def __str__(self):
+        return self.first_name + ' ' + (self.surname if self.surname else '')
+
+    class Meta:
+        verbose_name = 'Guest'
+        verbose_name_plural = 'Guests'

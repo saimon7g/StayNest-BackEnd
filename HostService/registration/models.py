@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from datetime import timedelta
 
 def get_local_time():
     return timezone.localtime(timezone.now())
@@ -19,8 +20,6 @@ class SomeBasics(models.Model):
     number_of_beds = models.IntegerField()
     number_of_bathrooms = models.FloatField()
 
-from django.db import models
-
 class PropertyRegistration(models.Model):
     STATUS_CHOICES = [
         ('incomplete', 'Incomplete'),
@@ -30,8 +29,8 @@ class PropertyRegistration(models.Model):
     registration_id = models.BigAutoField(primary_key=True)
     property_type = models.CharField(max_length=255)
     property_sub_type = models.CharField(max_length=255)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
-    some_basics = models.ForeignKey(SomeBasics, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE,related_name='Location')
+    some_basics = models.ForeignKey(SomeBasics, on_delete=models.CASCADE,related_name='SomeBasics')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     #created_at= localtime 
     created_at = models.DateTimeField(default=get_local_time)
@@ -141,8 +140,13 @@ class PayingGuest(models.Model):  # Step 6
     photo = models.TextField()
 
 class SelectedDate(models.Model):
+    STATUS_CHOICES = [
+        ('available', 'Available'),
+        ('unavailable', 'unavailable'),
+    ]
     start_date = models.DateField()
     end_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
 
 
 class PropertyStep7(models.Model):
@@ -154,6 +158,34 @@ class PropertyStep7(models.Model):
 
         # Call superclass delete method to delete the PropertyStep7 instance
         super(PropertyStep7, self).delete(*args, **kwargs)
+    
 
 
 
+
+
+class Host(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField()
+    nid_document = models.FileField(upload_to='documents/', null=True, blank=True)
+    passport_document = models.FileField(upload_to='documents/', null=True, blank=True)
+    joined_at = models.DateTimeField(default=get_local_time)
+
+
+
+    def __str__(self):
+        return self.first_name + ' ' + (self.surname if self.surname else '')
+
+    class Meta:
+        verbose_name = 'Host'
+        verbose_name_plural = 'Hosts'
+
+
+class PropertyReview(models.Model):
+    property_id = models.ForeignKey(PropertyRegistration, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    review = models.TextField()
+    rating = models.IntegerField()
+    created_at = models.DateTimeField(default=get_local_time)

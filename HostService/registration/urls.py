@@ -17,7 +17,13 @@ urlpatterns = [
     path('property_registration/step6/<str:registration_id>/', views.step6_view, name='step6'),
     path('property_registration/step7/<str:registration_id>/', views.step7_view, name='step7'),
     #search result of properties
-    path('api/properties/search/', views.search_properties_view, name='search_properties'),
-    path('api/property/<str:property_id>',views.property_details_view,name='property_details'),
+    path('properties/search/', views.search_properties_view, name='search_properties'),
+    path('property/<str:property_id>/',views.property_details_view,name='property_details'),
+    path('property/<str:property_id>/availability/',views.property_availability_view,name='property_availability'),
+
+    path('profile/', views.profile_view, name='profile'),
+    path('review/<str:property_id>/', views.review_view, name='review')
+    
+    
     
 ]

@@ -1,9 +1,11 @@
 # serializers.py
 from rest_framework import serializers
+from datetime import date
+from django.contrib.auth.models import User
 from .models import( Location, SomeBasics, RegularAmenities, StandoutAmenities, Photo,
                     PropertyRegistration, PropertyStep2, PropertyStep3, PropertyStep4,
                       MealOption, PropertyStep5, PayingGuest, PropertyStep7,
-                      SelectedDate
+                      SelectedDate,Host,PropertyReview,
 )
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -153,6 +155,8 @@ class PropertyStep7Serializer(serializers.ModelSerializer):
 
 
 class CompleteRegistrationSerializer(serializers.ModelSerializer):
+    location = LocationSerializer()
+    some_basics = SomeBasicsSerializer()
     step2 = serializers.SerializerMethodField()
     step3 = serializers.SerializerMethodField()
     step4 = serializers.SerializerMethodField()
@@ -162,7 +166,7 @@ class CompleteRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PropertyRegistration
-        fields = '__all__'
+        fields = ['registration_id', 'location', 'some_basics', 'step2', 'step3', 'step4', 'step5', 'paying_guest', 'step7']
 
     def get_step2(self, obj):
         step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
@@ -178,12 +182,15 @@ class CompleteRegistrationSerializer(serializers.ModelSerializer):
         step4_instance = PropertyStep4.objects.get(registration_id=obj.registration_id)
         serializer = PropertyStep4Serializer(step4_instance)
         return serializer.data
-
     def get_step5(self, obj):
-        step5_instance = PropertyStep5.objects.get(registration_id=obj.registration_id)
+        try:
+            step5_instance = PropertyStep5.objects.get(registration_id=obj.registration_id)
+        except PropertyStep5.DoesNotExist:
+        # PropertyStep5 instance does not exist, return None or an empty dictionary
+            return None  # or return {} if you prefer an empty dictionary
+
         serializer = PropertyStep5Serializer(step5_instance)
         return serializer.data
-
     def get_paying_guest(self, obj):
         paying_guest_instance = PayingGuest.objects.get(registration_id=obj.registration_id)
         serializer = PayingGuestSerializer(paying_guest_instance)
@@ -193,3 +200,197 @@ class CompleteRegistrationSerializer(serializers.ModelSerializer):
         step7_instance = PropertyStep7.objects.get(registration_id=obj.registration_id)
         serializer = PropertyStep7Serializer(step7_instance)
         return serializer.data
+
+#  {
+#       "property_id": "123456",
+#       "name": "Cozy Apartment in New York",
+#       "location_name": "New York",
+#       "price_per_night": 150,
+#       "availability": {
+#         "check_in": "2024-01-12",
+#         "check_out": "2024-01-15"
+#       },
+#       "photo": "base64convertedstring"
+#     },
+class ConcisePropertySerializer(serializers.ModelSerializer):
+     property_id = serializers.CharField(source='registration_id')
+     name = serializers.CharField(source='step3.house_title')
+     location_name = serializers.CharField(source='location.selected_location')
+     price_per_night = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
+     availability = serializers.SerializerMethodField()
+     photo = serializers.SerializerMethodField()          
+
+     class Meta:
+        model = PropertyRegistration
+        fields = ['property_id', 'name', 'location_name', 'price_per_night','availability', 'photo']
+
+
+     def get_photo(self, obj):
+        # Get the first photo object if it exists, otherwise return None
+        first_photo = obj.step2.photos.first()
+        return first_photo.image_data if first_photo else None
+     def get_availability(self, obj):
+            
+            step7_instance = PropertyStep7.objects.get(registration_id=obj.registration_id)
+            intervals = step7_instance.selected_dates.filter(
+                start_date__gte=date.today(), status='available',
+            ).order_by('start_date')
+            
+            if intervals.exists():
+                interval = intervals.first()
+                serializer = SelectedDateSerializer(interval)
+                return serializer.data
+            else:
+                return None
+            
+
+
+#             {
+#   "listing_id": "123456",
+#   "name": "Cozy Apartment in New York",
+#   "location": "New York",
+#   "property_type": "Apartment",
+#   "property_subtype": "City Center",
+#   "description": "A comfortable and stylish apartment in the heart of the city.",
+#   "price": 150,
+#   "availability": {
+#     "check_in": "2024-01-12",
+#     "check_out": "2024-01-15"
+#   },
+#   "regular_amenities": ["Wi-Fi", "Kitchen", "Air Conditioning", "TV"],
+#   "standout_amenities": ["Private Balcony", "Jacuzzi"],
+#   "highlights": [
+#     "Close to public transportation",
+#     "Walking distance to popular attractions"
+#   ],
+#   "host": {
+#     "host_id": "789",
+#     "host_name": "John Doe",
+#     "host_email": "john.doe@example.com"
+#   },
+#   "photos": [
+#     {
+#       "url": "https://example.com/photo1.jpg",
+#       "title": "Living Room"
+#     },
+#     {
+#       "url": "https://example.com/photo2.jpg",
+#       "title": "Bedroom"
+#     },
+#     {
+#       "url": "https://example.com/photo3.jpg",
+#       "title": "Kitchen"
+#     }
+#   ],
+#   "reviews": [
+#     {
+#       "user": "Alice",
+#       "comment": "Great location and cozy atmosphere. Loved it!",
+#       "rating": 5
+#     },
+#     {
+#       "user": "Bob",
+#       "comment": "Clean and well-maintained. Would stay again.",
+#       "rating": 4
+#     }
+#     // Add more review objects as needed
+#   ]
+# }
+#Serializer host
+class HostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Host
+        fields = '__all__'
+
+class PropertyReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyReview
+        fields = '__all__'
+        
+class DetailedPropertySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='step3.house_title')
+    location = serializers.CharField(source='location.selected_location')
+    description = serializers.CharField(source='step3.description')
+    price = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
+    availability = serializers.SerializerMethodField()
+    regular_amenities = serializers.SerializerMethodField()
+    standout_amenities = serializers.SerializerMethodField()
+    highlights = serializers.JSONField(source='step3.highlights')
+    host = serializers.SerializerMethodField()
+    photos = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PropertyRegistration
+        fields = ['name', 'location', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'host', 'photos', 'reviews']
+
+    def get_availability(self, obj):
+        try:
+            step7_instance = PropertyStep7.objects.get(registration_id=obj.registration_id)
+            intervals = step7_instance.selected_dates.filter(
+                start_date__gte=date.today(), status='available',
+            ).order_by('start_date')
+
+            if intervals.exists():
+                interval = intervals.first()
+                serializer = SelectedDateSerializer(interval)
+                return serializer.data
+            else:
+                return None
+        except PropertyStep7.DoesNotExist:
+            return None
+
+    def get_regular_amenities(self, obj):
+        try:
+            step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
+            amenities = step2_instance.regular_amenities.all()
+            return [amenity.name for amenity in amenities]
+        except PropertyStep2.DoesNotExist:
+            return []
+
+    def get_standout_amenities(self, obj):
+        try:
+            step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
+            amenities = step2_instance.standout_amenities.all()
+            return [amenity.name for amenity in amenities]
+        except PropertyStep2.DoesNotExist:
+            return []
+
+    def get_host(self, obj):
+        try:
+            user_id = obj.user
+            host = Host.objects.get(user_id=user_id)
+            serializer = HostSerializer(host)
+            return serializer.data
+        except (Host.DoesNotExist, AttributeError):
+            return None
+
+    def get_photos(self, obj):
+        try:
+            step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
+            photos = step2_instance.photos.all()
+            return [
+                {
+                    "image_data": photo.image_data,
+                    "title": photo.description
+                }
+                for photo in photos
+            ]
+        except PropertyStep2.DoesNotExist:
+            return []
+
+    def get_reviews(self, obj):
+        try:
+            property_id = obj.registration_id
+            reviews = PropertyReview.objects.filter(property_id=property_id)
+            return [
+                {
+                    "user": review.user.username,
+                    "comment": review.comment,
+                    "rating": review.rating
+                }
+                for review in reviews
+            ]
+        except PropertyReview.DoesNotExist:
+            return []
+        
