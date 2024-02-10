@@ -58,6 +58,28 @@ class Booking(models.Model):
     def __str__(self):
         return f"Booking ID: {self.id}, Property: {self.property.name}, User: {self.user.username}"
 
+class MealOption(models.Model):
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+class MealBooking(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='meal_bookings')
+    meal_type = models.CharField(max_length=10)  # 'breakfast', 'lunch', or 'dinner'
+    selected = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=0)
+    options = models.ManyToManyField(MealOption)
+
+class Pricing(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='reservation')
+    reservation_price = models.DecimalField(max_digits=10, decimal_places=2)
+    staying_price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
+    number_of_nights = models.IntegerField()
+    number_of_persons = models.IntegerField()
+    total_staying_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_meals_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Reservation for Booking ID: {self.booking.id}"
 
 class Payment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -87,3 +109,13 @@ class Guest(models.Model):
     class Meta:
         verbose_name = 'Guest'
         verbose_name_plural = 'Guests'
+
+class GuestReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guest_reviews')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='guest_reviews')
+    review = models.TextField()
+    rating = models.PositiveIntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review for {self.property.name} by {self.user.username}"
