@@ -7,6 +7,8 @@ from django.views.decorators.http import require_GET, require_POST
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from datetime import date
+from django.utils import timezone
 from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertyStep4,PropertyStep5,PayingGuest,
                      PropertyStep7,SelectedDate,PropertyReview,Host,Location)
 from .serializers import (PropertyRegistrationSerializer,LocationSerializer,SomeBasicsSerializer,PropertyStep2Serializer,
@@ -388,47 +390,58 @@ def complete_registration_view(request, registration_id):
     serializer = CompleteRegistrationSerializer(registration_instance)
     return Response(serializer.data)
 
-@api_view(['GET'])
+@api_view(['GET','PUT'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def search_properties_view(request):
-    location = request.data['location']
-    print('location',location)
-    # guests = request.GET.get('guests')
-    guests = request.data['guests']
-    room_type = request.data['room_type']
-    # Get the 'price_range' query parameter
-    price_range = request.data['price_range']
+    category = request.data.get('category', 'any')
+
+    
     
 
     # Access the 'min' and 'max' keys of the 'price_range' dictionary
-    price_range_min = price_range['min']    
-    price_range_max = price_range['max']
-    category = request.GET.get('category', 'any')
-    check_in = datetime.strptime(request.data['check_in'], '%Y-%m-%d').date()
-    check_out = datetime.strptime(request.data['check_out'], '%Y-%m-%d').date()
+    
 
     # Get properties with selected dates that overlap with the given check-in and check-out dates
-    properties = PropertyRegistration.objects.filter(
-        status='completed',
-        location__selected_location=location, 
-        step7__selected_dates__start_date__lte=check_in,  # Selected date start before or on check-out date
-        step7__selected_dates__end_date__gte=check_out  # Selected date end after or on check-in date
-    ).distinct()  # Get distinct properties
-    serialized_properties = ConcisePropertySerializer (properties, many=True).data
+    if category == 'any':
+        properties = PropertyRegistration.objects.filter(
+            status='completed',
+            step7__selected_dates__start_date__gte=date.today(),  # Selected date start before or on check-out date
+        ).distinct()  # Get distinct properties
+        serialized_properties = ConcisePropertySerializer(properties, many=True).data
+        return Response({"results": serialized_properties}) 
+    else:
+        location = request.data['location']
+        print('location',location)
+        # guests = request.GET.get('guests')
+        guests = request.data['guests']
+        room_type = request.data['room_type']
+        # Get the 'price_range' query parameter
+        price_range = request.data['price_range']
+        price_range_min = price_range['min']    
+        price_range_max = price_range['max']
+        check_in = datetime.strptime(request.data['check_in'], '%Y-%m-%d').date()
+        check_out = datetime.strptime(request.data['check_out'], '%Y-%m-%d').date()
+        properties = PropertyRegistration.objects.filter(
+            status='completed',
+            # location__selected_location=location, 
+            step7__selected_dates__start_date__lte=check_in,  # Selected date start before or on check-out date
+            step7__selected_dates__end_date__gte=check_out  # Selected date end after or on check-in date
+        ).distinct()  # Get distinct properties
+        serialized_properties = ConcisePropertySerializer (properties, many=True).data
 
-    property_list = []
-    for property in serialized_properties:
-        registration_id = property['property_id'] 
-        property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
-        selected_dates = property_step7.selected_dates.filter(
-            start_date__gte=check_in, end_date__lte=check_out, status='available'
-        ).order_by('start_date')
-        if selected_dates:
-            interval = selected_dates.first()
-            property['availability'] = SelectedDateSerializer(interval).data
-            property_list.append(property)
-    return Response({"results": property_list})
+        property_list = []
+        for property in serialized_properties:
+            registration_id = property['property_id'] 
+            property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
+            selected_dates = property_step7.selected_dates.filter(
+                start_date__gte=check_in, end_date__lte=check_out, status='available'
+            ).order_by('start_date')
+            if selected_dates:
+                interval = selected_dates.first()
+                property['availability'] = SelectedDateSerializer(interval).data
+                property_list.append(property)
+        return Response({"results": property_list})
 
 
 
