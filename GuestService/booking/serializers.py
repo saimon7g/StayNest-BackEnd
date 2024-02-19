@@ -1,17 +1,23 @@
 from rest_framework import serializers
 from .models import Property, MealOption, MealBooking, Pricing
+from .models import Reservation
+
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = '__all__'
 
 class MealOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MealOption
-        fields = ['name', 'price']
+        fields = ['name', 'price','quantity']
 
 class MealBookingSerializer(serializers.ModelSerializer):
     options = MealOptionSerializer(many=True)
 
     class Meta:
         model = MealBooking
-        fields = ['selected', 'options', 'quantity']
+        fields = ['selected', 'options']
 
 class PricingSerializer(serializers.ModelSerializer):
     meals = serializers.SerializerMethodField()

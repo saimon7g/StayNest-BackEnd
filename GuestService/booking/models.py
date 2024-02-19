@@ -36,6 +36,27 @@ class Property(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='properties', validators=[validate_host_user])
     def __str__(self):
         return self.name
+class Reservation(models.Model):
+     STATUS_CHOICES = [
+        ('requested', 'requested'),
+        ('confirmed', 'Confirmed'),
+        ('canceled', 'Canceled'),
+        ('ready_for_payment', 'Ready for Payment'),
+        ('negotiation_going_on', 'Negotiation Going On'),
+    ]
+     reservation_id = models.AutoField(primary_key=True)
+     property_id = models.IntegerField()
+     property_name = models.CharField(max_length=100)
+     guest_id =  models.IntegerField()
+     host_id =  models.IntegerField()
+     start_date = models.DateField()
+     end_date = models.DateField()
+     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+     total_meals_price = models.DecimalField(max_digits=10, decimal_places=2)
+     total_staying_price = models.DecimalField(max_digits=10, decimal_places=2)
+     number_of_persons = models.PositiveIntegerField()
+     number_of_nights = models.PositiveIntegerField(default=3)  
+
 
 class Booking(models.Model):
     STATUS_CHOICES = [
@@ -61,13 +82,12 @@ class Booking(models.Model):
 class MealOption(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField(default=0)
 
 class MealBooking(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='meal_bookings')
     meal_type = models.CharField(max_length=10)  # 'breakfast', 'lunch', or 'dinner'
-    selected = models.BooleanField(default=False)
-    quantity = models.IntegerField(default=0)
-    options = models.ManyToManyField(MealOption)
+    options = models.ManyToManyField(MealOption,related_name='meal_options')
 
 class Pricing(models.Model):
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='reservation')

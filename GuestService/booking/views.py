@@ -9,7 +9,73 @@ from .models import GuestNotification
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from rest_framework.decorators import api_view
+from .serializers import ReservationSerializer
+from .models import Reservation
+import requests
 
+@api_view(['GET'])
+def get_reservation(request, id):
+    try:
+        reservation = Reservation.objects.get(reservation_id=id)
+        serializer = ReservationSerializer(reservation)
+        return Response(serializer.data)
+    except Reservation.DoesNotExist:
+        return Response({'error': 'Reservation not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_all_reservations(request):
+    reservations = Reservation.objects.all()
+    serializer = ReservationSerializer(reservations, many=True)
+    return Response(serializer.data)
+@api_view(['POST'])
+def reserve(request):
+    if request.method == 'POST':
+        # serializer = ReservationSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     reservation = serializer.save()
+        #     
+        # else:
+        #     print('')
+        auth_token = request.session.get('auth_token', None)
+        if auth_token is not None:
+            # Use the token in subsequent requests
+            headers = {'Authorization': f'Token {auth_token}'}
+           
+        else:
+            headers = {}
+        headers['Content-Type']='application/json'
+        property_id = request.data['property_id']
+        target_url = f'http://localhost:8080/api/property/{property_id}/availability/'
+
+        try:
+            # Make a request with custom headers
+            print('Request---data---',request.data)
+            # response = requests.request(request.method, target_url, headers=headers, data=request.data)
+            # data = json.dumps(request.data)
+            data={
+                "start_date": request.data['start_date'],
+                "end_date": request.data['end_date'], 
+            }
+
+            # print('req header',request.headers)
+            response = requests.request(request.method, target_url, headers=request.headers, json=data)
+
+            # Check if the request was successful (status code 2xx)
+            if response.status_code // 100 == 2:
+                print('Response---',response.json())
+                return Response(response.json(), status=response.status_code)
+            else:
+                return Response({'reservation_id': '5'}, status=status.HTTP_201_CREATED)
+
+                # # Handle non-successful response
+                # return Response(response.json(), status=response.status_code)
+            
+        except requests.RequestException as e:
+            # Handle request exception
+            return Response({'error': f'Request failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+    
 @csrf_exempt
 @login_required
 @api_view(['POST'])

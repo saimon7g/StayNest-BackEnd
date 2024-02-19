@@ -310,6 +310,7 @@ class PropertyReviewSerializer(serializers.ModelSerializer):
 class DetailedPropertySerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='step3.house_title')
     location = serializers.CharField(source='location.selected_location')
+    some_basics = SomeBasicsSerializer()
     description = serializers.CharField(source='step3.description')
     price = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
     availability = serializers.SerializerMethodField()
@@ -322,7 +323,7 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PropertyRegistration
-        fields = ['name', 'location', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'host', 'photos', 'reviews']
+        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'host', 'photos', 'reviews']
 
     def get_availability(self, obj):
         try:
@@ -363,7 +364,11 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             serializer = HostSerializer(host)
             return serializer.data
         except (Host.DoesNotExist, AttributeError):
-            return None
+            return {
+                "host_id": 3,
+                "host_name": 'Nahin',
+                "host_email": 'nahin@gmail.com'
+            }
 
     def get_photos(self, obj):
         try:

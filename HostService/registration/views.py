@@ -260,33 +260,45 @@ def step4_view(request, registration_id):
     
 @csrf_exempt
 @api_view(['GET', 'PUT'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated, IsHostGroup])
+
+
 def step5_view(request, registration_id):
     try:    
         if request.method == 'GET':
-            # Check if step5 data is in the session
             step5_data_session = request.session.get('step5_data', {})
             if step5_data_session:
                 serializer = PropertyStep5Serializer(data=step5_data_session)
                 if serializer.is_valid():
                     return Response(serializer.data, status=status.HTTP_200_OK)
-            # If step5 data is not in the session, check if it's in the database
             try:
                 property_step5 = PropertyStep5.objects.get(registration_id=registration_id)
                 serializer = PropertyStep5Serializer(instance=property_step5)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                print('serializer',json.dumps(serializer.data)  )
+                data= json.dumps(serializer.data)
+
+                return Response(data, status=status.HTTP_200_OK)
             except PropertyStep5.DoesNotExist:
                 # If step5 data is not in the session or database, return an error
                 return Response({"error": "Property step5 data not found."}, status=status.HTTP_404_NOT_FOUND)
         elif request.method == 'PUT':
+
+           
             data = request.data
             data['registration_id'] = registration_id  
-
-            # Save the data in the session
-            request.session['step5_data'] = data
-
-            return Response({"message": "Property registration step 2 done", "data": data}, status=status.HTTP_200_OK)
+            try:
+                # Check if entry exists
+                property_step5 = PropertyStep5.objects.get(registration_id=registration_id)
+                property_step5.delete()  # Delete existing entry
+            except PropertyStep5.DoesNotExist:
+                pass  # Entry does not exist, proceed to create a new one
+            print('data',data['breakfast'])
+            serializer = PropertyStep5Serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "Property registration step 5 updated successfully"}, status=200)
+            else:
+                print('error',serializer.errors)
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 @csrf_exempt
@@ -396,8 +408,6 @@ def complete_registration_view(request, registration_id):
 def search_properties_view(request):
     category = request.data.get('category', 'any')
 
-    
-    
 
     # Access the 'min' and 'max' keys of the 'price_range' dictionary
     
@@ -406,7 +416,7 @@ def search_properties_view(request):
     if category == 'any':
         properties = PropertyRegistration.objects.filter(
             status='completed',
-            step7__selected_dates__start_date__gte=date.today(),  # Selected date start before or on check-out date
+            step7__selected_dates__end_date__gte=date.today(),  # Selected date start before or on check-out date
         ).distinct()  # Get distinct properties
         serialized_properties = ConcisePropertySerializer(properties, many=True).data
         return Response({"results": serialized_properties}) 
