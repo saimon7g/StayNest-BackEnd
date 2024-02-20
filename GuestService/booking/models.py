@@ -55,8 +55,7 @@ class Reservation(models.Model):
      total_meals_price = models.DecimalField(max_digits=10, decimal_places=2)
      total_staying_price = models.DecimalField(max_digits=10, decimal_places=2)
      number_of_persons = models.PositiveIntegerField()
-     number_of_nights = models.PositiveIntegerField(default=3)  
-
+     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
 class Booking(models.Model):
     STATUS_CHOICES = [
