@@ -169,6 +169,7 @@ class Host(models.Model):
     first_name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField()
+    phone_number = models.CharField(max_length=255)
     nid_document = models.FileField(upload_to='documents/', null=True, blank=True)
     passport_document = models.FileField(upload_to='documents/', null=True, blank=True)
     joined_at = models.DateTimeField(default=get_local_time)
