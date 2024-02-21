@@ -30,8 +30,13 @@ class SignupView(APIView):
             user=serializer.save()
             guest_group = Group.objects.get(name='guest')
             guest_group.user_set.add(user)
+            host_group = Group.objects.get(name='host')
+            host_group.user_set.add(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print('error')
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     def post(self, request):
@@ -41,6 +46,8 @@ class LoginView(APIView):
         if user.check_password(request.data['password']):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
  
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

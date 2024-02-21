@@ -10,11 +10,11 @@ from rest_framework import status
 from datetime import date
 from django.utils import timezone
 from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertyStep4,PropertyStep5,PayingGuest,
-                     PropertyStep7,SelectedDate,PropertyReview,Host,Location)
+                     PropertyStep7,SelectedDate,PropertyReview,Location)
 from .serializers import (PropertyRegistrationSerializer,LocationSerializer,SomeBasicsSerializer,PropertyStep2Serializer,
                           PropertyStep3Serializer,PropertyStep4Serializer,PropertyStep5Serializer,PayingGuestSerializer,
                           PropertyStep7Serializer,CompleteRegistrationSerializer,ConcisePropertySerializer,SelectedDateSerializer,
-                          DetailedPropertySerializer,PayingGuestSerializer,PropertyReviewSerializer,HostSerializer)
+                          DetailedPropertySerializer,PayingGuestSerializer,PropertyReviewSerializer)
                           
 
 
@@ -536,6 +536,4 @@ def review_view(request, property_id):
 @api_view(['GET'])
 def profile_view(request):
     # Retrieve host profile
-    host_profile = request.user.host
-    serializer = HostSerializer(host_profile)
-    return Response(serializer.data)
+    return Response({})

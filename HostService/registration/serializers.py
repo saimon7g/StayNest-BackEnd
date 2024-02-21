@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from .models import( Location, SomeBasics, RegularAmenities, StandoutAmenities, Photo,
                     PropertyRegistration, PropertyStep2, PropertyStep3, PropertyStep4,
                       MealOption, PropertyStep5, PayingGuest, PropertyStep7,
-                      SelectedDate,Host,PropertyReview,
+                      SelectedDate,PropertyReview,
 )
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -296,11 +296,7 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
 #     // Add more review objects as needed
 #   ]
 # }
-#Serializer host
-class HostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Host
-        fields = '__all__'
+
 
 class PropertyReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -333,8 +329,8 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             ).order_by('start_date')
 
             if intervals.exists():
-                interval = intervals.first()
-                serializer = SelectedDateSerializer(interval)
+                
+                serializer = SelectedDateSerializer(intervals, many=True)
                 return serializer.data
             else:
                 return None
@@ -358,17 +354,7 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             return []
 
     def get_host(self, obj):
-        try:
-            user_id = obj.user
-            host = Host.objects.get(user_id=user_id)
-            serializer = HostSerializer(host)
-            return serializer.data
-        except (Host.DoesNotExist, AttributeError):
-            return {
-                "host_id": 3,
-                "host_name": 'Nahin',
-                "host_email": 'nahin@gmail.com'
-            }
+            return "set_host"
 
     def get_photos(self, obj):
         try:

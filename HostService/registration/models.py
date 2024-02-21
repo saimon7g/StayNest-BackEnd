@@ -162,28 +162,6 @@ class PropertyStep7(models.Model):
 
 
 
-
-
-class Host(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=255)
-    surname = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=255)
-    nid_document = models.FileField(upload_to='documents/', null=True, blank=True)
-    passport_document = models.FileField(upload_to='documents/', null=True, blank=True)
-    joined_at = models.DateTimeField(default=get_local_time)
-
-
-
-    def __str__(self):
-        return self.first_name + ' ' + (self.surname if self.surname else '')
-
-    class Meta:
-        verbose_name = 'Host'
-        verbose_name_plural = 'Hosts'
-
-
 class PropertyReview(models.Model):
     property_id = models.ForeignKey(PropertyRegistration, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
