@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Handler',# Handler
+    'authService',# Auth
+    
 
 ]
 
@@ -93,22 +95,22 @@ WSGI_APPLICATION = 'APIGateWay.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER': 'postgres.kkkridwaybvihynzddyf',
-#         'PASSWORD': 'stayNest12@12',
-#         'HOST': 'aws-0-us-west-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
-#         'PORT': '6543',        # Default PostgreSQL port
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.kkkridwaybvihynzddyf',
+        'PASSWORD': 'stayNest12@12',
+        'HOST': 'aws-0-us-west-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
+        'PORT': '6543',        # Default PostgreSQL port
+    }
+}
 
 
 # Password validation
