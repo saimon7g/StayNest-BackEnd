@@ -24,10 +24,9 @@ from .serializers import UserSerializer, UserProfileSerializer, HostSerializer
 #     return Response(serializer.errors, status=status.HTTP_200_OK)
 
 class SignupView(APIView):
-    def post(self, request):
-        # print("request.data",request.data)
+    def post(self, request):        
         serializer = UserSerializer(data=request.data)
-        # print("after serializer",serializer)
+   
         if serializer.is_valid():
             user=serializer.save()
             guest_group = Group.objects.get(name='guest')
