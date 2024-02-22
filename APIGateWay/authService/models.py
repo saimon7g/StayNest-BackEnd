@@ -8,7 +8,7 @@ class UserProfile(models.Model):
     profile_picture =models.TextField(blank=True, null=True)
     nid_document = models.FileField(upload_to='documents/', null=True, blank=True)
     passport_document = models.FileField(upload_to='documents/', null=True, blank=True)
-    superhost = models.BooleanField(default=False, blank=True)
+    superhost = models.BooleanField(default=False)
 
     def __str__(self):
          return self.user.username

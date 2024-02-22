@@ -374,11 +374,10 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
                 
                 # send a dictionary with the image_data and title
                 {
-                    "image_data": photo.image_data,
-                    "title": photo.description
+                    "image_data":photo.image_data,
+                    "title": photo.description,
                 }
-                for photo in photos
-
+                 for photo in photos
             ]
         except PropertyStep2.DoesNotExist:
             return []
