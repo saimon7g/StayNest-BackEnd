@@ -460,17 +460,16 @@ def search_properties_view(request):
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def property_details_view(request,property_id):
-    # try:
-    #     registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
-    # except PropertyRegistration.DoesNotExist:
-    #     return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+    try:
+        registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
+    except PropertyRegistration.DoesNotExist:
+        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    # serializer =ConcisePropertySerializer (registration_instance)
+    serializer =DetailedPropertySerializer (registration_instance)
 
-    # data=serializer.data
-    print(request)
-    print('property_id',property_id)
-    return Response({"wat":"ok"}, status=status.HTTP_200_OK)
+    data=serializer.data
+    
+    return Response(data, status=status.HTTP_200_OK)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),

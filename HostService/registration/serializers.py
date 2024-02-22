@@ -362,6 +362,7 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
 
     def get_host(self, obj):
             return {
+                    "host_id": obj.user.id,
                     "details":"setdetails",
                     }
 
