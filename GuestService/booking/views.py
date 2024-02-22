@@ -9,28 +9,28 @@ from .models import GuestNotification
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from rest_framework.decorators import api_view
-from .serializers import ReservationSerializer
-from .models import Reservation
+from .serializers import BookingSerializer
+from .models import Booking
 import requests
 
 @api_view(['GET'])
 def get_reservation(request, id):
     try:
-        reservation = Reservation.objects.get(reservation_id=id)
-        serializer = ReservationSerializer(reservation)
+        reservation = Booking.objects.get(reservation_id=id)
+        serializer = BookingSerializer(reservation)
         return Response(serializer.data)
-    except Reservation.DoesNotExist:
-        return Response({'error': 'Reservation not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def get_all_reservations(request):
-    reservations = Reservation.objects.all()
-    serializer = ReservationSerializer(reservations, many=True)
+    reservations = Booking.objects.all()
+    serializer = BookingSerializer(reservations, many=True)
     return Response(serializer.data)
 @api_view(['POST'])
 def reserve(request):
     if request.method == 'POST':
-        # serializer = ReservationSerializer(data=request.data)
+        # serializer = BookingSerializer(data=request.data)
         # if serializer.is_valid():
         #     reservation = serializer.save()
         #     

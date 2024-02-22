@@ -1,46 +1,83 @@
 from rest_framework import serializers
-from .models import Property, MealOption, MealBooking, Pricing
-from .models import Reservation
 
-class ReservationSerializer(serializers.ModelSerializer):
+from .models import Booking, Meal
+
+# class MealOptionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MealOption
+#         fields = '__all__'
+
+# class PropertyStep5Serializer(serializers.ModelSerializer):
+#     breakfast = MealOptionSerializer(many=True)
+#     lunch = MealOptionSerializer(many=True)
+#     dinner = MealOptionSerializer(many=True)
+
+#     class Meta:
+#         model = PropertyStep5
+#         fields = '__all__'
+
+#     def create(self, validated_data):
+#         breakfast_data = validated_data.pop('breakfast', [])
+#         lunch_data = validated_data.pop('lunch', [])
+#         dinner_data = validated_data.pop('dinner', [])
+
+#         property_step5_instance = PropertyStep5.objects.create(**validated_data)
+
+#         self.create_meal_options(property_step5_instance, 'breakfast', breakfast_data)
+#         self.create_meal_options(property_step5_instance, 'lunch', lunch_data)
+#         self.create_meal_options(property_step5_instance, 'dinner', dinner_data)
+
+#         return property_step5_instance
+
+#     def create_meal_options(self, property_step5_instance, meal_type, options_data):
+#         for option_data in options_data:
+#             meal_option = MealOption.objects.create(**option_data)
+#             getattr(property_step5_instance, meal_type).add(meal_option)
+
+
+
+class MealSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Reservation
+        model = Meal
         fields = '__all__'
 
-class MealOptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MealOption
-        fields = ['name', 'price','quantity']
-
-class MealBookingSerializer(serializers.ModelSerializer):
-    options = MealOptionSerializer(many=True)
+class BookingSerializer(serializers.ModelSerializer):
+    breakfast = MealSerializer(many=True)
+    lunch = MealSerializer(many=True)
+    dinner = MealSerializer(many=True)
 
     class Meta:
-        model = MealBooking
-        fields = ['selected', 'options']
+        model = Booking
+        fields = '__all__'
 
-class PricingSerializer(serializers.ModelSerializer):
-    meals = serializers.SerializerMethodField()
+    def create(self, validated_data):
+        breakfast_data = validated_data.pop('breakfast', [])
+        lunch_data = validated_data.pop('lunch', [])
+        dinner_data = validated_data.pop('dinner', [])
 
-    class Meta:
-        model = Pricing
-        fields = ['reservation_price', 'staying_price_per_night', 'number_of_nights', 'number_of_persons', 'total_staying_price', 'meals', 'total_meals_price']
+        booking_instance = Booking.objects.create(**validated_data)
 
-    def get_meals(self, obj):
-        meal_bookings = obj.booking.meal_bookings.all()
-        meal_serializer = MealBookingSerializer(meal_bookings, many=True)
-        return meal_serializer.data
+        self.create_meals(booking_instance, 'breakfast', breakfast_data)
+        self.create_meals(booking_instance, 'lunch', lunch_data)
+        self.create_meals(booking_instance, 'dinner', dinner_data)
 
-class BookingSerializer(serializers.Serializer):
-    status = serializers.CharField(max_length=20)
-    message = serializers.CharField()
-    reservation_id = serializers.CharField()
-    check_in_date = serializers.DateField()
-    check_out_date = serializers.DateField()
-    pricing = PricingSerializer()
-    property = serializers.CharField()
-    user = serializers.CharField()
-    booking_issue_date = serializers.DateTimeField()
-    confirmation_date = serializers.DateTimeField()
-    class Meta:
-        fields = ['status', 'message', 'reservation_id', 'check_in_date', 'check_out_date', 'pricing', 'property', 'user', 'booking_issue_date', 'confirmation_date']
+        return booking_instance
+
+    def create_meals(self, booking_instance, meal_type, meals_data):
+        for meal_data in meals_data:
+            meal = Meal.objects.create(**meal_data)
+            getattr(booking_instance, meal_type).add(meal)
+
+    def update(self, instance, validated_data):
+        breakfast_data = validated_data.pop('breakfast', [])
+        lunch_data = validated_data.pop('lunch', [])
+        dinner_data = validated_data.pop('dinner', [])
+
+        instance = super().update(instance, validated_data)
+
+        self.update_meals(instance, 'breakfast', breakfast_data)
+        self.update_meals(instance, 'lunch', lunch_data)
+        self.update_meals(instance, 'dinner', dinner_data)
+
+        return instance
+    
