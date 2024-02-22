@@ -371,11 +371,14 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
             photos = step2_instance.photos.all()
             return [
+                
+                # send a dictionary with the image_data and title
                 {
-                    "image_data":'blank',
-                    "title": 'manual'
+                    "image_data": photo.image_data,
+                    "title": photo.description
                 }
-                # for photo in photos
+                for photo in photos
+
             ]
         except PropertyStep2.DoesNotExist:
             return []
