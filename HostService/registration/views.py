@@ -90,7 +90,7 @@ def step1_view(request):
     elif request.method == 'POST':
         try:
             auth_header = request.headers.get('Authorization')
-
+            print(auth_header)
             if auth_header and auth_header.startswith('Token '):
                 # Extract the token from the Authorization header
                 token_key = auth_header.split(' ')[1]
@@ -101,7 +101,7 @@ def step1_view(request):
 
                     # Assuming Token model has a user foreign key field named 'user'
                     user_id = token.user.id
-
+                    print(request.data)
                     # Check if the user is in the 'host' group
                     if token.user.groups.filter(name='host').exists():
                         serializer = PropertyRegistrationSerializer(data={**request.data, 'user': user_id})
@@ -110,6 +110,7 @@ def step1_view(request):
                             step1_instance = serializer.save()
                             return Response({"registration_id": step1_instance.registration_id, "message": "Property registration step 1 completed."}, status=status.HTTP_201_CREATED)
                         else:
+                            print(serializer.errors)
                             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         # User is authenticated, but not in the 'host' group
@@ -127,7 +128,7 @@ def step1_view(request):
         except Exception as e:
             import traceback
             traceback_str = traceback.format_exc()
-            print("Error processing POST request")
+            print("Error processing POST request ",traceback_str)
             return Response({"error": str(e), "traceback": traceback_str}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @csrf_exempt
 @api_view(['GET', 'PUT'])
@@ -459,13 +460,17 @@ def search_properties_view(request):
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def property_details_view(request,property_id):
-    try:
-        registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
-    except PropertyRegistration.DoesNotExist:
-        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+    # try:
+    #     registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
+    # except PropertyRegistration.DoesNotExist:
+    #     return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer =DetailedPropertySerializer (registration_instance)
-    return Response(serializer.data)  
+    # serializer =ConcisePropertySerializer (registration_instance)
+
+    # data=serializer.data
+    print(request)
+    print('property_id',property_id)
+    return Response({"wat":"ok"}, status=status.HTTP_200_OK)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),

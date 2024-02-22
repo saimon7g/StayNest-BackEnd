@@ -362,7 +362,6 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
 
     def get_host(self, obj):
             return {
-                    "host_id":obj.user,
                     "details":"setdetails",
                     }
 
@@ -372,10 +371,10 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             photos = step2_instance.photos.all()
             return [
                 {
-                    "image_data": photo.image_data,
-                    "title": photo.description
+                    "image_data":'blank',
+                    "title": 'manual'
                 }
-                for photo in photos
+                # for photo in photos
             ]
         except PropertyStep2.DoesNotExist:
             return []

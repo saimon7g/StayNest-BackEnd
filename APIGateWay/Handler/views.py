@@ -31,6 +31,7 @@ from rest_framework import status
 
 @method_decorator(csrf_exempt, name='dispatch')
 
+
 class RedirectHostView(APIView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -52,31 +53,31 @@ class RedirectHostView(APIView):
 
         try:
             data = request.data
+            # print(request.headers)
             response = requests.request(request.method, target_url, headers=request.headers, json=data)
 
             if response.status_code // 100 == 2:
-                host = response.data.get('host', {})
-                if host:
-                    try:
-                        user = User.objects.get(id=host.get('host_id'))
-                        serializer = UserSerializer(user)
-                        if serializer.is_valid():
-                            response.data['host'] = serializer.data
-                        else:
-                            print(serializer.errors)
-                    except User.DoesNotExist:
-                        print('no host..')
-
-                        
-                    except serializers.ValidationError:
-                        pass  # Handle serializer validation errors
+                print(response)
+                
+                # response_data = response.json()  # Parse JSON response
+                # host = response_data.get('host', {})
+                # if host:
+                #     try:
+                #         user = User.objects.get(id=host.get('host_id'))
+                #         serializer = UserSerializer(user)
+                #         if serializer.is_valid():
+                #             response_data['host'] = serializer.data
+                #     except User.DoesNotExist:
+                #         pass  # Handle the case where the user doesn't exist
+                #     except serializers.ValidationError:
+                #         pass  # Handle serializer validation errors
                 return Response(response.json(), status=response.status_code)
             else:
                 return Response(response.json(), status=response.status_code)
         except requests.RequestException as e:
             return Response({'error': f'Request failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+       
 @method_decorator(csrf_exempt, name='dispatch')
 class RedirectGuestView(APIView):
     def dispatch(self, request, *args, **kwargs):
