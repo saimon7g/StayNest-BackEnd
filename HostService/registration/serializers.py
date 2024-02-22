@@ -372,10 +372,10 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             photos = step2_instance.photos.all()
             return [
                 {
-                    "image_data":'blank',
-                    "title": 'manual'
+                    "image_data":photo.image_data,
+                    "title": photo.description,
                 }
-                # for photo in photos
+                 for photo in photos
             ]
         except PropertyStep2.DoesNotExist:
             return []
