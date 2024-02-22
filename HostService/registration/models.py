@@ -31,6 +31,10 @@ class PropertyRegistration(models.Model):
     property_sub_type = models.CharField(max_length=255)
     location = models.ForeignKey(Location, on_delete=models.CASCADE,related_name='Location')
     some_basics = models.ForeignKey(SomeBasics, on_delete=models.CASCADE,related_name='SomeBasics')
+    
+    stay=models.BooleanField(default=True)
+    stay_with_meal=models.BooleanField(default=True)
+    paying_guest=models.BooleanField(default=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     #created_at= localtime 
     created_at = models.DateTimeField(default=get_local_time)
@@ -134,7 +138,7 @@ class PropertyStep5(models.Model):
         super(PropertyStep5, self).delete(*args, **kwargs)
 
 class PayingGuest(models.Model):  # Step 6
-    registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='paying_guest')
+    registration_id = models.OneToOneField(PropertyRegistration, on_delete=models.CASCADE, related_name='paying_guest_detail')
     description = models.TextField()
     meal_price = models.DecimalField(max_digits=10, decimal_places=2)
     photo = models.TextField()

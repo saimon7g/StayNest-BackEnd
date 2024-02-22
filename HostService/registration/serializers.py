@@ -313,13 +313,20 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
     regular_amenities = serializers.SerializerMethodField()
     standout_amenities = serializers.SerializerMethodField()
     highlights = serializers.JSONField(source='step3.highlights')
+    booking_options=serializers.SerializerMethodField()
     host = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = PropertyRegistration
-        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'host', 'photos', 'reviews']
+        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'booking_options','host', 'photos', 'reviews']
+    def get_booking_options(self, obj):
+        return {
+            "stay": obj.stay,
+            "stay_with_meal": obj.stay_with_meal,
+            "paying_guest": obj.paying_guest
+        }
 
     def get_availability(self, obj):
         try:
@@ -354,7 +361,10 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
             return []
 
     def get_host(self, obj):
-            return "set_host"
+            return {
+                    "host_id":obj.user,
+                    "details":"setdetails",
+                    }
 
     def get_photos(self, obj):
         try:
