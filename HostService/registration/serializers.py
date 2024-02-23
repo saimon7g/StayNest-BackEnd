@@ -297,11 +297,6 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
 #   ]
 # }
 
-
-class PropertyReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PropertyReview
-        fields = '__all__'
         
 class DetailedPropertySerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='step3.house_title')
@@ -435,3 +430,8 @@ class BookedPropertyDetailsSerializer(serializers.ModelSerializer):
             return photo.image_data if photo else None
         except PropertyStep2.DoesNotExist:
             return None
+class PropertyReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyReview
+        fields = '__all__'
+    

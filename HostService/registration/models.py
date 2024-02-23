@@ -168,7 +168,8 @@ class PropertyStep7(models.Model):
 
 class PropertyReview(models.Model):
     property_id = models.ForeignKey(PropertyRegistration, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    reviewer_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    reviewer_name=models.TextField()
     review = models.TextField()
     rating = models.IntegerField()
     created_at = models.DateTimeField(default=get_local_time)

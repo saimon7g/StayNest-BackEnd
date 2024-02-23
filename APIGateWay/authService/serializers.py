@@ -59,5 +59,4 @@ class HostSerializer(serializers.Serializer):
     def get_response_time(self, obj):
         return "within an hour"
     
-    
-    
+
