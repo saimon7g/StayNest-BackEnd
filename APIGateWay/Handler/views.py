@@ -96,16 +96,7 @@ class RedirectGuestView(APIView):
     # Add other methods as needed
 
     def handle_redirect(self, request, path):
-        # Construct the target URL by appending the original path to http://localhost:8080/
-        auth_token = request.session.get('auth_token', None)
 
-        if auth_token is not None:
-            # Use the token in subsequent requests
-            headers = {'Authorization': f'Token {auth_token}'}
-           
-        else:
-            headers = {}
-        headers['Content-Type']='application/json'
         target_url = f'http://localhost:8090/{path}/'
 
         try:

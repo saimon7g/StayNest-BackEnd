@@ -42,9 +42,9 @@ class MealSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BookingSerializer(serializers.ModelSerializer):
-    breakfast = MealSerializer(many=True)
-    lunch = MealSerializer(many=True)
-    dinner = MealSerializer(many=True)
+    breakfast = MealSerializer(many=True,required = False)
+    lunch = MealSerializer(many=True,required = False)
+    dinner = MealSerializer(many=True,required = False)
 
     class Meta:
         model = Booking

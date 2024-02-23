@@ -35,7 +35,8 @@ def update_intervals_and_mark_unavailable(arg_interval, property_step7):
     
     for interval in selected_dates:
         if arg_interval.start_date >= interval.start_date and arg_interval.end_date <= interval.end_date:
-            # Split the interval
+            if interval.status == 'unavailable':
+                return False
             print('interval.start_date',interval.start_date)
             if arg_interval.start_date > interval.start_date:
 
@@ -504,8 +505,12 @@ def property_availability_view(request,property_id):
                                 end_date=datetime.strptime(arg_interval_end_date, '%Y-%m-%d').date())
 
         try:
-            update_intervals_and_mark_unavailable(arg_interval, property_step7)
-            return Response({"message": "Intervals updated successfully"})
+            updated=update_intervals_and_mark_unavailable(arg_interval, property_step7)
+            if updated:
+                return Response({"message": "Intervals updated successfully"}, status=200)
+            else:
+                return Response({"message": "Intervals not updated"}, status=status.HTTP_409_CONFLICT)
+            
         except:
             return Response({"message": "No intervals updated"})
     

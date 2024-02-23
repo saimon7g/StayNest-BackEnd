@@ -41,8 +41,8 @@ class Booking(models.Model):
     ]
 
     property_id = models.BigIntegerField()
-    guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings_as_guest')
-    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings_as_host')
+    guest_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings_as_guest')
+    host_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_host')
     booking_type = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
@@ -50,9 +50,9 @@ class Booking(models.Model):
     platform_fee = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_guests = models.IntegerField()
-    breakfast = models.ManyToManyField(Meal, related_name='breakfast_options')
-    lunch = models.ManyToManyField(Meal, related_name='lunch_options')
-    dinner = models.ManyToManyField(Meal, related_name='dinner_options')
+    breakfast = models.ManyToManyField(Meal, related_name='breakfast_options', blank=True, null=True)
+    lunch = models.ManyToManyField(Meal, related_name='lunch_options', blank=True,null=True)
+    dinner = models.ManyToManyField(Meal, related_name='dinner_options', blank=True,null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(default=get_local_time)
     updated_at = models.DateTimeField(default=get_local_time)

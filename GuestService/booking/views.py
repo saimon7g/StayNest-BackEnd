@@ -12,11 +12,16 @@ from rest_framework.decorators import api_view
 from .serializers import BookingSerializer
 from .models import Booking
 import requests
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from rest_framework.decorators import api_view
 
 @api_view(['GET'])
-def get_reservation(request, id):
+def get_reservation(request, reservation_id):
     try:
-        reservation = Booking.objects.get(reservation_id=id)
+        reservation = Booking.objects.get(id=reservation_id)
         serializer = BookingSerializer(reservation)
         return Response(serializer.data)
     except Booking.DoesNotExist:
@@ -27,27 +32,31 @@ def get_all_reservations(request):
     reservations = Booking.objects.all()
     serializer = BookingSerializer(reservations, many=True)
     return Response(serializer.data)
+
+@permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def reserve(request):
+
+    
+    token_key = None
+
     if request.method == 'POST':
-        # serializer = BookingSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     reservation = serializer.save()
-        #     
-        # else:
-        #     print('')
-        auth_token = request.session.get('auth_token', None)
-        if auth_token is not None:
-            # Use the token in subsequent requests
-            headers = {'Authorization': f'Token {auth_token}'}
-           
+        auth_token = request.headers.get('Authorization')
+        if auth_token and auth_token.startswith('Token '):
+            token_key = auth_token.split(' ')[1]
         else:
-            headers = {}
-        headers['Content-Type']='application/json'
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        user_id = User.objects.get(auth_token=token_key).id
+        print('user_id---',user_id)
+   
         property_id = request.data['property_id']
         target_url = f'http://localhost:8080/api/property/{property_id}/availability/'
 
         try:
+            # find user_id from token
+            #user_id = request.user.id not works
+            
             # Make a request with custom headers
             print('Request---data---',request.data)
             # response = requests.request(request.method, target_url, headers=headers, data=request.data)
@@ -63,13 +72,18 @@ def reserve(request):
             # Check if the request was successful (status code 2xx)
             if response.status_code // 100 == 2:
                 print('Response---',response.json())
-                return Response(response.json(), status=response.status_code)
+                data = request.data
+                data['guest_id'] = user_id
+                print('user_id---',user_id)
+                serializer = BookingSerializer(data=request.data)
+                if serializer.is_valid():
+                    reservation = serializer.save()
+                    return Response({"message":"Booking Successful","reservation_id":reservation.id}, status=status.HTTP_201_CREATED)
+                else:
+                    print('error---',serializer.errors)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'reservation_id': '5'}, status=status.HTTP_201_CREATED)
-
-                # # Handle non-successful response
-                # return Response(response.json(), status=response.status_code)
-            
+                return Response({'message': 'This property is already booked. Please try another!'}, status=status.HTTP_200_OK)            
         except requests.RequestException as e:
             # Handle request exception
             return Response({'error': f'Request failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
