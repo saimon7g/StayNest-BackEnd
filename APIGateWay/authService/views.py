@@ -35,7 +35,7 @@ class SignupView(APIView):
             host_group.user_set.add(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print("error ------------           ",serializer.errors)
+            # print("error ------------           ",serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -71,8 +71,6 @@ def logout(request):
 
     return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
 
-
-
 class HostSignupView(APIView):
     def post(self, request, uid):
         try:
@@ -87,6 +85,33 @@ class HostSignupView(APIView):
         
         
 class HostProfileView(APIView):
+    def get(self, request, uid):
+        try:
+            user = User.objects.get(id=uid)
+            serializer = HostSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class GuestProfileView(APIView):
+    def get(self, request, uid):
+        try:
+            user = User.objects.get(id=uid)
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class HostProfileDetailsView(APIView):
+    
+    
+    
     def get(self, request, uid):
         try:
             user = User.objects.get(id=uid)
