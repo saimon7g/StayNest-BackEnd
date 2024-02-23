@@ -19,6 +19,7 @@ urlpatterns = [
     #search result of properties
     path('properties/search/', views.search_properties_view, name='search_properties'),
     path('property/<str:property_id>/',views.property_details_view,name='property_details'),
+    path('dashboard/property/<str:property_id>/',views.property_dashboard_view,name='property_dashboard'),
     path('property/<str:property_id>/availability/',views.property_availability_view,name='property_availability'),
 
     path('profile/', views.profile_view, name='profile'),

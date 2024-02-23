@@ -397,3 +397,41 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
         except PropertyReview.DoesNotExist:
             return []
         
+
+#  "propert_details": {
+#         //             "property_id": 123456,
+#         //             "property_name": "Aloha",
+#         //             "property_type": "Villa",
+#         //             "property_sub_type": "Entire Villa",
+#         //             "image_data": "sfgsgsdgdfsgsdgsdg",
+#         //             "address": "123, Aloha Street, Aloha, Aloha",
+#         //             "number_of_guests": 4,
+#         //             "number_of_bedrooms": 2,
+#         //             "number_of_beds": 3,
+#         //             "number_of_bathrooms": 2,
+#         //         },
+        
+
+class BookedPropertyDetailsSerializer(serializers.ModelSerializer):
+    property_id = serializers.CharField(source='registration_id')
+    property_name = serializers.CharField(source='step3.house_title')
+    property_type = serializers.CharField(source='some_basics.property_type')
+    property_sub_type = serializers.CharField(source='some_basics.property_sub_type')
+    image_data = serializers.SerializerMethodField()
+    address = serializers.CharField(source='location.selected_location')
+    number_of_guests = serializers.IntegerField(source='some_basics.number_of_guests')
+    number_of_bedrooms = serializers.IntegerField(source='some_basics.number_of_bedrooms')
+    number_of_beds = serializers.IntegerField(source='some_basics.number_of_beds')
+    number_of_bathrooms = serializers.IntegerField(source='some_basics.number_of_bathrooms')
+
+    class Meta:
+        model = PropertyRegistration
+        fields = ['property_id', 'property_name', 'property_type', 'property_sub_type', 'image_data', 'address', 'number_of_guests', 'number_of_bedrooms', 'number_of_beds', 'number_of_bathrooms']
+
+    def get_image_data(self, obj):
+        try:
+            step2_instance = PropertyStep2.objects.get(registration_id=obj.registration_id)
+            photo = step2_instance.photos.first()
+            return photo.image_data if photo else None
+        except PropertyStep2.DoesNotExist:
+            return None

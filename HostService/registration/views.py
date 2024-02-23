@@ -473,6 +473,19 @@ def property_details_view(request,property_id):
     return Response(data, status=status.HTTP_200_OK)
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def property_dashboard_view(request,property_id):
+    try:
+        registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
+    except PropertyRegistration.DoesNotExist:
+        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = 
+
+    data=serializer.data
+    
+    return Response(data, status=status.HTTP_200_OK)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def step1_detail_view(request,registration_id):
     
