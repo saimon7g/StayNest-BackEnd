@@ -546,3 +546,19 @@ def review_view(request, property_id):
 def profile_view(request):
     # Retrieve host profile
     return Response({})
+
+
+@api_view(['GET', 'POST'])
+def property_review_list(request, property_id):
+    if request.method == 'GET':
+        property_reviews = PropertyReview.objects.filter(property_id=property_id)
+        serializer = PropertyReviewSerializer(property_reviews, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        request.data['property_id'] = property_id  # Ensure property_id is set in the request data
+        serializer = PropertyReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

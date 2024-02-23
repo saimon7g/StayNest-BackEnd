@@ -22,7 +22,7 @@ urlpatterns = [
     path('property/<str:property_id>/availability/',views.property_availability_view,name='property_availability'),
 
     path('profile/', views.profile_view, name='profile'),
-    path('review/<str:property_id>/', views.review_view, name='review')
+    path('review/<str:property_id>/', views.property_review_list, name='review')
     
     
     
