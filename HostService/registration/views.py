@@ -73,10 +73,13 @@ def mark_available(registration_id,start_date,end_date):
     try:
         property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
     except PropertyStep7.DoesNotExist:
+        print('PropertyStep7 instance not found for the provided registration_id')
         return False
-    
+    print(start_date)
     # Create a SelectedDate instance from the arg_interval data
     arg_interval = SelectedDate(start_date=start_date, end_date=end_date)
+    
+    print(arg_interval)
     try:
         #  if a interval in the selected_dates queryset matches with the arg_interval
         #  and status is 'unavailable', make the interval 'available'
