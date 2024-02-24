@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
+from rest_framework import status
+from .serializers import TemporaryBookingSerializer
 
 class NegotiationListView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
@@ -200,3 +202,63 @@ class OfferRejectedByGuestView(APIView):
             "negotiation_status": "rejectedbyguest",
         }
         return Response(data)
+    
+class OfferAcceptedByHostView(APIView):
+    # permission_classes = [IsAuthenticated]
+    
+    # const data = {
+    #         negotiation_id: negotiationId,
+    #         negotiation_status: "acceptedbyhost",
+    #     };
+
+    def put(self, request):
+        print("OfferAcceptedByHostView")
+        print(request)
+        data = {
+            "negotiation_id": "1",
+            "negotiation_status": "acceptedbyhost",
+        }
+        return Response(data)
+    
+class OfferRejectedByHostView(APIView):
+    # permission_classes = [IsAuthenticated]
+    
+    # const data = {
+    #         negotiation_id: negotiationId,
+    #         negotiation_status: "rejectedbyhost",
+    #     };
+
+    def put(self, request):
+        print("OfferRejectedByHostView")
+        print(request)
+        data = {
+            "negotiation_id": "1",
+            "negotiation_status": "rejectedbyhost",
+        }
+        return Response(data)
+    
+class StartNegotiationByGuestView(APIView):
+    # permission_classes = [IsAuthenticated]
+    
+    # const data = {
+    #         negotiation_id: negotiationId,
+    #         negotiation_status: "pending",
+    #     };
+
+    def post(self, request, *args, **kwargs):
+        
+        print ("StartNegotiationByGuestView")
+        print (request.data)
+        serializer = TemporaryBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print (" elseeeeeee ------------")
+            print (serializer.errors)
+        
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    

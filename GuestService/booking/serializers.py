@@ -81,3 +81,9 @@ class BookingSerializer(serializers.ModelSerializer):
 
         return instance
     
+
+class UpcomingBookingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['start_date', 'end_date', 'booking_type']
+    
