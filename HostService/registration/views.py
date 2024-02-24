@@ -14,7 +14,8 @@ from .models import (PropertyRegistration,PropertyStep2,PropertyStep3,PropertySt
 from .serializers import (PropertyRegistrationSerializer,LocationSerializer,SomeBasicsSerializer,PropertyStep2Serializer,
                           PropertyStep3Serializer,PropertyStep4Serializer,PropertyStep5Serializer,PayingGuestSerializer,
                           PropertyStep7Serializer,CompleteRegistrationSerializer,ConcisePropertySerializer,SelectedDateSerializer,
-                          DetailedPropertySerializer,PayingGuestSerializer,PropertyReviewSerializer)
+                          DetailedPropertySerializer,PayingGuestSerializer,PropertyReviewSerializer,
+                          BookedPropertyDetailsSerializer)
                           
 
 
@@ -67,6 +68,32 @@ def update_intervals_and_mark_unavailable(arg_interval, property_step7):
 # Usage example:
 # Assuming arg_interval and property_step7 are defined elsewhere
 # update_intervals_and_mark_unavailable(arg_interval, property_step7)
+def mark_available(registration_id,start_date,end_date):
+    # Fetch the PropertyStep7 instance using the registration_id
+    try:
+        property_step7 = PropertyStep7.objects.get(registration_id=registration_id)
+    except PropertyStep7.DoesNotExist:
+        return False
+    
+    # Create a SelectedDate instance from the arg_interval data
+    arg_interval = SelectedDate(start_date=start_date, end_date=end_date)
+    try:
+        #  if a interval in the selected_dates queryset matches with the arg_interval
+        #  and status is 'unavailable', make the interval 'available'
+
+        selected_dates = property_step7.selected_dates.all()
+        for interval in selected_dates:
+            if arg_interval.start_date == interval.start_date and arg_interval.end_date == interval.end_date:
+                if interval.status == 'unavailable':
+                    interval.status = 'available'
+                    interval.save()
+                    return True
+                else:
+                    return True
+        return False
+    except:
+        return False
+    
 
 
 @api_view(['GET'])
@@ -473,6 +500,19 @@ def property_details_view(request,property_id):
     return Response(data, status=status.HTTP_200_OK)
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def property_dashboard_view(request,property_id):
+    try:
+        registration_instance = PropertyRegistration.objects.get(registration_id=property_id)
+    except PropertyRegistration.DoesNotExist:
+        return Response({'error': 'Registration not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = BookedPropertyDetailsSerializer(registration_instance)
+
+    data=serializer.data
+    
+    return Response(data, status=status.HTTP_200_OK)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),
 def step1_detail_view(request,registration_id):
     
@@ -515,8 +555,23 @@ def property_availability_view(request,property_id):
             return Response({"message": "No intervals updated"})
     
 
-
+@api_view(['GET', 'POST']) 
+def mark_interval_available_view(request,property_id):
+    if request.method == 'GET':
+        return Response({"Message":"mark_interval_available_view"})
+    if request.method == 'POST':
+        start_date = request.data['start_date']
+        end_date = request.data['end_date']
+        marked=mark_available(property_id,start_date,end_date)
+        if marked:
+            return Response({"message": "Interval marked as available"}, status=200)
+        else:
+            return Response({"message": "Interval not marked as available"}, status=status.HTTP_409_CONFLICT)
+        
+        
 @api_view(['GET', 'POST'])
+
+
 def review_view(request, property_id):
     # Get the property registration object
     

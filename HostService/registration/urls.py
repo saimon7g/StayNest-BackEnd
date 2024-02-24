@@ -19,8 +19,11 @@ urlpatterns = [
     #search result of properties
     path('properties/search/', views.search_properties_view, name='search_properties'),
     path('property/<str:property_id>/',views.property_details_view,name='property_details'),
+    path('dashboard/property/<str:property_id>/',views.property_dashboard_view,name='property_dashboard'),
     path('property/<str:property_id>/availability/',views.property_availability_view,name='property_availability'),
-
+# def mark_interval_available_view(request,property_id):
+    path('property/<str:property_id>/mark_interval_available/',views.mark_interval_available_view,name='mark_interval_available'),
+    
     path('profile/', views.profile_view, name='profile'),
     path('review/<str:property_id>/', views.property_review_list, name='review')
     
