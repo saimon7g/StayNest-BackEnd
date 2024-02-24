@@ -59,17 +59,29 @@ def test_token(request):
 @authentication_classes([])
 @permission_classes([])
 def logout(request):
-    # Delete the authentication token associated with the user
-    if 'auth_token' in request.session:
-        auth_token = request.session.pop('auth_token', None)
-        if auth_token:
-            try:
-                token = Token.objects.get(key=auth_token)
-                token.delete()
-            except Token.DoesNotExist:
-                pass  # Token not found, but continue with logout
+#    find auth token from header
+    try:
 
-    return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+        auth_header = request.headers.get('Authorization')
+        print(auth_header)
+        if auth_header and auth_header.startswith('Token '):
+                # Extract the token from the Authorization header
+            token_key = auth_header.split(' ')[1]
+
+            try:
+                    # Retrieve the Token object using the token key
+                token = Token.objects.get(key=token_key)
+
+                    # Delete the token
+                token.delete()
+            except:
+                pass
+    except:
+
+        pass
+
+    return Response({"message":"logout done"})
+    
 
 class HostSignupView(APIView):
     def post(self, request, uid):

@@ -381,14 +381,10 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
         try:
             property_id = obj.registration_id
             reviews = PropertyReview.objects.filter(property_id=property_id)
-            return [
-                {
-                    "user": review.user.username,
-                    "comment": review.comment,
-                    "rating": review.rating
-                }
-                for review in reviews
-            ]
+            reviews = reviews.order_by('-created_at')
+            return PropertyReviewSerializer(reviews, many=True).data
+
+        
         except PropertyReview.DoesNotExist:
             return []
         
@@ -410,8 +406,8 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
 class BookedPropertyDetailsSerializer(serializers.ModelSerializer):
     property_id = serializers.CharField(source='registration_id')
     property_name = serializers.CharField(source='step3.house_title')
-    property_type = serializers.CharField(source='some_basics.property_type')
-    property_sub_type = serializers.CharField(source='some_basics.property_sub_type')
+    property_type = serializers.CharField()
+    property_sub_type = serializers.CharField()
     image_data = serializers.SerializerMethodField()
     address = serializers.CharField(source='location.selected_location')
     number_of_guests = serializers.IntegerField(source='some_basics.number_of_guests')
