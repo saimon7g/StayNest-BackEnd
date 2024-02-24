@@ -173,3 +173,4 @@ class PropertyReview(models.Model):
     review = models.TextField()
     rating = models.IntegerField()
     created_at = models.DateTimeField(default=get_local_time)
+
