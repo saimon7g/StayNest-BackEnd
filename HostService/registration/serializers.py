@@ -222,7 +222,7 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
 
      class Meta:
         model = PropertyRegistration
-        fields = ['property_id', 'name', 'location_name', 'price_per_night','availability', 'photo']
+        fields = ['property_id', 'online_type','name', 'location_name', 'price_per_night','availability', 'photo']
 
 
      def get_photo(self, obj):

@@ -29,6 +29,27 @@ import json
 from datetime import datetime,timedelta
 from django.core import serializers
 
+def getUserByToken(request):
+    auth_header = request.headers.get('Authorization')
+    print(auth_header)
+    if auth_header and auth_header.startswith('Token '):
+        # Extract the token from the Authorization header
+        token_key = auth_header.split(' ')[1]
+
+        try:
+            # Retrieve the Token object using the token key
+            token = Token.objects.get(key=token_key)
+
+            # Assuming Token model has a user foreign key field named 'user'
+            user_id = token.user.id
+            return user_id
+        except Token.DoesNotExist:
+            # Handle the case where the token is not found
+            return False
+
+    else:
+        # Authentication header is missing or invalid
+        return False
 def update_intervals_and_mark_unavailable(arg_interval, property_step7):
     selected_dates = property_step7.selected_dates.all()
     print(selected_dates)
@@ -433,7 +454,34 @@ def complete_registration_view(request, registration_id):
 
     serializer = CompleteRegistrationSerializer(registration_instance)
     return Response(serializer.data)
+@api_view(['GET','PUT'])
+@permission_classes([AllowAny])
+def properties_by_type_view(request):
+    if request.method == 'GET':
+        return Response({"Message":"properties_by_type_view"})
+    if request.method == 'PUT':
+        type = request.data['online_type']
+        properties = PropertyRegistration.objects.filter(
+            status='completed',
+            online_type=type
+        ).distinct()  # Get distinct properties
+        serialized_properties = ConcisePropertySerializer(properties, many=True).data
+        return Response({"results": serialized_properties})
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def my_listings_view(request):
+    if request.method == 'GET':
+        host_id = getUserByToken(request)
+        print('host_id',host_id)
+        
 
+        properties = PropertyRegistration.objects.filter(
+            status='completed',
+            user=host_id).distinct()  # Get distinct properties
+        serialized_properties = ConcisePropertySerializer(properties, many=True).data
+        return Response(serialized_properties)
+             
 @api_view(['GET','PUT'])
 @permission_classes([AllowAny])
 #  search_properties_view, name='search_properties'),

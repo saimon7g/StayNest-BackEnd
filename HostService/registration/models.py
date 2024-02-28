@@ -28,6 +28,7 @@ class PropertyRegistration(models.Model):
 
     registration_id = models.BigAutoField(primary_key=True)
     property_type = models.CharField(max_length=255)
+    online_type=models.CharField(max_length=255,default='Standard')
     property_sub_type = models.CharField(max_length=255)
     location = models.ForeignKey(Location, on_delete=models.CASCADE,related_name='Location')
     some_basics = models.ForeignKey(SomeBasics, on_delete=models.CASCADE,related_name='SomeBasics')
