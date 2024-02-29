@@ -3,7 +3,103 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
 from .serializers import TemporaryBookingSerializer
+from .models import TemporaryBooking
+from rest_framework.authtoken.models import Token
+from rest_framework import status
 
+
+def getUserByToken(request):
+    auth_header = request.headers.get('Authorization')
+    print(auth_header)
+    if auth_header and auth_header.startswith('Token '):
+        # Extract the token from the Authorization header
+        token_key = auth_header.split(' ')[1]
+
+        try:
+            # Retrieve the Token object using the token key
+            token = Token.objects.get(key=token_key)
+
+            # Assuming Token model has a user foreign key field named 'user'
+            user_id = token.user.id
+            return user_id
+        except Token.DoesNotExist:
+            # Handle the case where the token is not found
+            return -1
+
+    else:
+        # Authentication header is missing or invalid
+        return -1
+
+
+class NegotiationAsGuestView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, guest_id):
+        guest_id = getUserByToken(request)
+        # retrieve all Temporarybookings where the guest_id == TemporaryBooking.guest_id
+        #Temporary Booking table is the negotiation table
+
+        # Your logic to retrieve negotiation data
+        negotiations=TemporaryBooking.objects.filter(guest_id=guest_id)
+        serializer = TemporaryBookingSerializer(negotiations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class NegotiationAsHostView(APIView):
+    
+        # permission_classes = [permissions.IsAuthenticated]
+    
+        def get(self, request):
+            host_id = getUserByToken(request)
+            # retrieve all Temporarybookings where the host_id == TemporaryBooking.host_id
+            #Temporary Booking table is the negotiation table
+    
+            # Your logic to retrieve negotiation data
+            negotiations=TemporaryBooking.objects.filter(host_id=host_id)
+            serializer = TemporaryBookingSerializer(negotiations, many=True)
+            print(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UpdateStatusView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, negotiation_id):
+       
+        print(request.data)
+        nego_status = request.data['status']
+        instance = TemporaryBooking.objects.get(id=negotiation_id)
+        if instance:
+            instance.status = nego_status
+            instance.save()
+            return Response({"message":"success"}, status=status.HTTP_200_OK)
+        else:
+            print("else")
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+       
+class HostProposedView(APIView):
+    def put(self,request,negotiation_id):
+       
+        instance = TemporaryBooking.objects.get(id=negotiation_id)
+        if instance:
+            instance.negotiation_status = "Host Proposed"
+            instance.host_price = request.data['host_price']    
+
+            instance.save()
+            return Response({"message":"success"}, status=status.HTTP_200_OK)
+        else:
+            
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+
+           
+
+    
+
+
+       
+        
+        
+        
 class NegotiationListView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
 

@@ -45,11 +45,11 @@ def getUserByToken(request):
             return user_id
         except Token.DoesNotExist:
             # Handle the case where the token is not found
-            return False
+            return -1
 
     else:
         # Authentication header is missing or invalid
-        return False
+        return -1
 def update_intervals_and_mark_unavailable(arg_interval, property_step7):
     selected_dates = property_step7.selected_dates.all()
     print(selected_dates)

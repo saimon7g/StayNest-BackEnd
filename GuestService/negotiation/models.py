@@ -25,10 +25,15 @@ class TemporaryBooking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ('guest_proposed', 'GuestProposed'),
+        ('host_proposed', 'HostProposed'),
+        ('rejected_by_guest', 'RejectedByGuest'),
+        ('rejected_by_host', 'RejectedByHost'),
     ]
 
     property_id = models.BigIntegerField()
+    property_name = models.CharField(max_length=255,default='ABC Home')
+    property_photo = models.TextField(null=True)
     guest_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='temporary_bookings_as_guest')
     host_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='temporary_property_host')
     booking_type = models.CharField(max_length=255)
@@ -38,10 +43,10 @@ class TemporaryBooking(models.Model):
     platform_fee = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_guests = models.IntegerField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     default_price = models.DecimalField(max_digits=10, decimal_places=2)
     guest_price = models.DecimalField(max_digits=10, decimal_places=2)
-    host_price = models.DecimalField(max_digits=10, decimal_places=2)
+    host_price = models.DecimalField(max_digits=10, decimal_places=2,null=True)
     negotiation_status = models.CharField(max_length=255, default='pending')
     created_at = models.DateTimeField(default=get_local_time)
     updated_at = models.DateTimeField(default=get_local_time)
