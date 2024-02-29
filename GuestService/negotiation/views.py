@@ -66,10 +66,10 @@ class UpdateStatusView(APIView):
     def put(self, request, negotiation_id):
        
         print(request.data)
-        nego_status = request.data['status']
+        nego_status = request.data['negotiation_status']
         instance = TemporaryBooking.objects.get(id=negotiation_id)
         if instance:
-            instance.status = nego_status
+            instance.negotiation_status = nego_status
             instance.save()
             return Response({"message":"success"}, status=status.HTTP_200_OK)
         else:
