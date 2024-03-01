@@ -13,6 +13,12 @@ class Location(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     selected_location = models.CharField(max_length=255)
+    house_name=models.CharField(default='Emtiaz villa')
+    holding_number=models.CharField(null=True)
+    flat_number=models.CharField(null=True)
+    road_number=models.CharField(null=True)
+    area_details=models.CharField(default='Chandpur Ilisher Gher')
+
 
 class SomeBasics(models.Model):
     number_of_guests = models.IntegerField()

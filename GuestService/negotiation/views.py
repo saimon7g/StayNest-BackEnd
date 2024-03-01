@@ -33,14 +33,16 @@ def getUserByToken(request):
 
 class NegotiationAsGuestView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, guest_id):
+    def get(self, request):
         guest_id = getUserByToken(request)
         # retrieve all Temporarybookings where the guest_id == TemporaryBooking.guest_id
         #Temporary Booking table is the negotiation table
 
         # Your logic to retrieve negotiation data
+        if guest_id == -1:
+            return Response({"message":"Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
         negotiations=TemporaryBooking.objects.filter(guest_id=guest_id)
         serializer = TemporaryBookingSerializer(negotiations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -55,6 +57,8 @@ class NegotiationAsHostView(APIView):
             #Temporary Booking table is the negotiation table
     
             # Your logic to retrieve negotiation data
+            if host_id == -1:
+                return Response({"message":"Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
             negotiations=TemporaryBooking.objects.filter(host_id=host_id)
             serializer = TemporaryBookingSerializer(negotiations, many=True)
             print(serializer.data)
