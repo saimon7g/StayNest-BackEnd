@@ -14,6 +14,6 @@ urlpatterns = [
     path('booking/<str:booking_id>/payment/', views.payment_view, name='payment'),
     path('booking/<str:booking_id>/payment/<str:payment_id>/', views.payment_with_id_view, name='payment_with_id'),
     path('upcoming_bookings/as_guest/', views.upcoming_bookings_as_guest, name='upcoming_bookings'),
-    # path('upcoming_bookings/as_host/', views.upcoming_bookings_as_host, name='upcoming_bookings_as_host'),
+    path('upcoming_bookings/as_host/', views.upcoming_bookings_as_host, name='upcoming_bookings_as_host'),
 ]
  

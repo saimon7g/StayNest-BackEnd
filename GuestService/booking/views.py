@@ -20,6 +20,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.decorators import api_view
 
+def getUidFromToken(request):
+    token = request.headers.get('Authorization')
+    if token and token.startswith('Token '):
+        token = token.split(' ')[1]
+        user = User.objects.get(auth_token=token)
+        if user:
+            return user.id
+    return -1
+    
+
 @api_view(['GET'])
 def get_reservation(request, reservation_id):
     try:
@@ -199,5 +209,16 @@ def upcoming_bookings_as_guest(request):
         upcoming_bookings_as_guest = Booking.objects.filter(start_date__gt=current_date)
 
         serializer = UpcomingBookingsSerializer(upcoming_bookings_as_guest, many=True)
+
+        return Response(serializer.data)
+    
+@api_view(['GET'])
+def upcoming_bookings_as_host(request):
+    if request.method == 'GET':
+        current_date = date.today()
+
+        upcoming_bookings_as_host = Booking.objects.filter(end_date__gt=current_date)
+
+        serializer = UpcomingBookingsSerializer(upcoming_bookings_as_host, many=True)
 
         return Response(serializer.data)
