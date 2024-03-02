@@ -312,10 +312,12 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
     host = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
+    negotiation_availability = serializers.BooleanField(source='step4.negotiation_availability')
 
     class Meta:
         model = PropertyRegistration
-        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'booking_options','host', 'photos', 'reviews']
+        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities',
+                   'highlights', 'booking_options','host', 'photos', 'reviews','stay','stay_with_meal','paying_guest','negotiation_availability']
     def get_booking_options(self, obj):
         return {
             "stay": obj.stay,
