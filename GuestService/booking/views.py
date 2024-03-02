@@ -198,10 +198,10 @@ def upcoming_bookings(request):
         current_date = date.today()
 
         # Query upcoming bookings with start_date greater than current date
-        upcoming_bookings = Booking.objects.filter(start_date__gt=current_date)
+        upcoming_bookings_as_guest = Booking.objects.filter(start_date__gt=current_date)
 
         # Serialize the upcoming bookings
-        serializer = UpcomingBookingsSerializer(upcoming_bookings, many=True)
+        serializer = UpcomingBookingsSerializer(upcoming_bookings_as_guest, many=True)
 
         # Return the serialized data in the response
         return Response(serializer.data)

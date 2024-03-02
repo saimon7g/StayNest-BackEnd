@@ -9,7 +9,6 @@ from rest_framework import serializers
 import json
 def hello_view(request):
     result ={
-        
         'message': 'Hello, World from APIGateWay Handler hello_view()',
     }
     return JsonResponse(result)
@@ -59,18 +58,7 @@ class RedirectHostView(APIView):
             if response.status_code // 100 == 2:
                 print(response)
                 
-                # response_data = response.json()  # Parse JSON response
-                # host = response_data.get('host', {})
-                # if host:
-                #     try:
-                #         user = User.objects.get(id=host.get('host_id'))
-                #         serializer = UserSerializer(user)
-                #         if serializer.is_valid():
-                #             response_data['host'] = serializer.data
-                #     except User.DoesNotExist:
-                #         pass  # Handle the case where the user doesn't exist
-                #     except serializers.ValidationError:
-                #         pass  # Handle serializer validation errors
+             
                 return Response(response.json(), status=response.status_code)
             else:
                 return Response(response.json(), status=response.status_code)
@@ -100,22 +88,18 @@ class RedirectGuestView(APIView):
         target_url = f'http://localhost:8090/{path}/'
 
         try:
-            # Make a request with custom headers
             print('Request---data---',request.data)
-            # response = requests.request(request.method, target_url, headers=headers, data=request.data)
-            # data = json.dumps(request.data)
+
             data=request.data
-            # print('req header',request.headers)
             response = requests.request(request.method, target_url, headers=request.headers, json=data)
 
-            # Check if the request was successful (status code 2xx)
             if response.status_code // 100 == 2:
                 print('Response---',response.json())
                 return Response(response.json(), status=response.status_code)
             else:
-                # Handle non-successful response
+            
                 return Response(response.json(), status=response.status_code)
             
         except requests.RequestException as e:
-            # Handle request exception
+            
             return Response({'error': f'Request failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
