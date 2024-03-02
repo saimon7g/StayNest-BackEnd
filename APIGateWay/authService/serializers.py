@@ -54,10 +54,11 @@ class HostSerializer(serializers.Serializer):
     response_time = serializers.SerializerMethodField()
     super_host = serializers.BooleanField(source='profile.superhost')
     profile_pic = serializers.CharField(source='profile.profile_picture')
+    phone = serializers.CharField(source='profile.phone')
     class Meta:
         model = User
-        fields = ['host_id', 'name', 'email', 'response_rate', 'response_time', 'super_host', 'profile_pic']
-    
+        fields = ['host_id', 'name', 'email', 'response_rate', 'response_time', 'super_host', 'profile_pic', 'email', 'phone']
+
     def get_response_rate(self, obj):
         return "100%"
     
