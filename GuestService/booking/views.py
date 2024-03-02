@@ -192,16 +192,12 @@ def payment_with_id_view(request, booking_id, payment_id):
     return Response({"message": f"Payment with ID {payment_id} retrieved/updated/deleted successfully for booking {booking_id}"}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def upcoming_bookings(request):
+def upcoming_bookings_as_guest(request):
     if request.method == 'GET':
-        # Get the current date
         current_date = date.today()
 
-        # Query upcoming bookings with start_date greater than current date
         upcoming_bookings_as_guest = Booking.objects.filter(start_date__gt=current_date)
 
-        # Serialize the upcoming bookings
         serializer = UpcomingBookingsSerializer(upcoming_bookings_as_guest, many=True)
 
-        # Return the serialized data in the response
         return Response(serializer.data)
