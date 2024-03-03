@@ -154,6 +154,7 @@ def step1_view(request):
                     # Assuming Token model has a user foreign key field named 'user'
                     user_id = token.user.id
                     print(request.data)
+                    request.data["online_type"] = "Standard"
                     # Check if the user is in the 'host' group
                     if token.user.groups.filter(name='host').exists():
                         serializer = PropertyRegistrationSerializer(data={**request.data, 'user': user_id})

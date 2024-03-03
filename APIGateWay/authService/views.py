@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User, Group
 from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, UserProfileSerializer, HostSerializer
+from .serializers import UserSerializer, UserProfileSerializer, HostSerializer,UserInfoSerializer
 
 
 def get_user_id_from_token(request):
@@ -31,6 +31,7 @@ class SignupView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             # print("error ------------           ",serializer.errors)
+            print("error ------------           ",serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -139,7 +140,7 @@ class UserView(APIView):
            
             user_id = get_user_id_from_token(request)
             user = User.objects.get(id=user_id)
-            serializer = UserProfileSerializer(user)
+            serializer = UserInfoSerializer(user)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:

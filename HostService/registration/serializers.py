@@ -218,11 +218,12 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
      location_name = serializers.CharField(source='location.selected_location')
      price_per_night = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
      availability = serializers.SerializerMethodField()
-     photo = serializers.SerializerMethodField()          
+     photo = serializers.SerializerMethodField()   
+            
 
      class Meta:
         model = PropertyRegistration
-        fields = ['property_id', 'online_type','name', 'location_name', 'price_per_night','availability', 'photo']
+        fields = ['property_id', 'online_type','name', 'location_name', 'price_per_night','availability', 'photo','stay','stay_with_meal','paying_guest']
 
 
      def get_photo(self, obj):
@@ -300,7 +301,7 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
         
 class DetailedPropertySerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='step3.house_title')
-    location = serializers.CharField(source='location.selected_location')
+    location = serializers.SerializerMethodField()
     some_basics = SomeBasicsSerializer()
     description = serializers.CharField(source='step3.description')
     price = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
