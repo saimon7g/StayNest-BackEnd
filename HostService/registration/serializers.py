@@ -301,7 +301,7 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
         
 class DetailedPropertySerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='step3.house_title')
-    location = serializers.SerializerMethodField()
+    location = serializers.CharField(source='location.selected_location')
     some_basics = SomeBasicsSerializer()
     description = serializers.CharField(source='step3.description')
     price = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
