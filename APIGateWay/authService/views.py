@@ -35,7 +35,7 @@ class SignupView(APIView):
             host_group.user_set.add(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            # print("error ------------           ",serializer.errors)
+            print("error ------------           ",serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):

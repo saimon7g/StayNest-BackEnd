@@ -1,4 +1,4 @@
 clear
-source venv/bin/activate
+source myenv/bin/activate
 cd HostService
 python manage.py runserver 8080

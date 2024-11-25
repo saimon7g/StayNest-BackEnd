@@ -1,4 +1,4 @@
 clear
-source venv/bin/activate
+source myenv/bin/activate
 cd APIGateWay
 python manage.py runserver 8000
