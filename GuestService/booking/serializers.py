@@ -85,5 +85,5 @@ class BookingSerializer(serializers.ModelSerializer):
 class UpcomingBookingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['start_date', 'end_date', 'booking_type']
+        fields = ['start_date', 'end_date', 'booking_type','property_name','property_photo','id']
     

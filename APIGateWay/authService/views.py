@@ -8,20 +8,15 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User, Group
 from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, UserProfileSerializer, HostSerializer
+from .serializers import UserSerializer, UserProfileSerializer, HostSerializer,UserInfoSerializer
 
 
-# @api_view(['POST'])
-# def signup(request):
-#     serializer = UserSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         user = User.objects.get(username=request.data['username'])
-#         user.set_password(request.data['password'])
-#         user.save()
-#         token = Token.objects.create(user=user)
-#         return Response({'token': token.key, 'user': serializer.data})
-#     return Response(serializer.errors, status=status.HTTP_200_OK)
+def get_user_id_from_token(request):
+    auth_header = request.headers.get('Authorization')
+    token_key = auth_header.split(' ')[1]
+    token = Token.objects.get(key=token_key)
+    user_id = token.user.id
+    return user_id
 
 class SignupView(APIView):
     def post(self, request):        
@@ -35,6 +30,7 @@ class SignupView(APIView):
             host_group.user_set.add(user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
+            # print("error ------------           ",serializer.errors)
             print("error ------------           ",serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -134,3 +130,21 @@ class HostProfileDetailsView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
            
+
+
+      
+class UserView(APIView):
+    def get(self, request):
+        try:
+           
+           
+            user_id = get_user_id_from_token(request)
+            user = User.objects.get(id=user_id)
+            serializer = UserInfoSerializer(user)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

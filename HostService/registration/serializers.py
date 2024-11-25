@@ -218,11 +218,12 @@ class ConcisePropertySerializer(serializers.ModelSerializer):
      location_name = serializers.CharField(source='location.selected_location')
      price_per_night = serializers.DecimalField(source='step4.price', max_digits=10, decimal_places=2)
      availability = serializers.SerializerMethodField()
-     photo = serializers.SerializerMethodField()          
+     photo = serializers.SerializerMethodField()   
+            
 
      class Meta:
         model = PropertyRegistration
-        fields = ['property_id', 'name', 'location_name', 'price_per_night','availability', 'photo']
+        fields = ['property_id', 'online_type','name', 'location_name', 'price_per_night','availability', 'photo','stay','stay_with_meal','paying_guest']
 
 
      def get_photo(self, obj):
@@ -312,10 +313,12 @@ class DetailedPropertySerializer(serializers.ModelSerializer):
     host = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
+    negotiation_availability = serializers.BooleanField(source='step4.negotiation_availability')
 
     class Meta:
         model = PropertyRegistration
-        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities', 'highlights', 'booking_options','host', 'photos', 'reviews']
+        fields = ['name', 'location','some_basics', 'property_type', 'property_sub_type', 'description', 'price', 'availability', 'regular_amenities', 'standout_amenities',
+                   'highlights', 'booking_options','host', 'photos', 'reviews','stay','stay_with_meal','paying_guest','negotiation_availability']
     def get_booking_options(self, obj):
         return {
             "stay": obj.stay,

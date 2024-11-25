@@ -41,6 +41,8 @@ class Booking(models.Model):
     ]
 
     property_id = models.BigIntegerField()
+    property_name = models.CharField(max_length=255,default='ABC Home')
+    property_photo = models.TextField(null=True)
     guest_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings_as_guest')
     host_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_host')
     booking_type = models.CharField(max_length=255)

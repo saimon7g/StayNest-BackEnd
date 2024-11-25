@@ -3,9 +3,19 @@ from django.contrib.auth.models import User
 from .models import UserProfile
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = UserProfile
-        fields = ['id', 'phone', 'address', 'profile_picture', 'nid_document', 'passport_document', 'superhost']
+        fields = ['id', 'phone', 'address', 'profile_picture']
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.CharField(source='profile.profile_picture')
+    phone= serializers.CharField(source='profile.phone')
+    address = serializers.CharField(source='profile.address')
+    class Meta:
+        model = User
+        fields = ['id', 'username','phone', 'address', 'profile_picture']
+
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=False)
@@ -49,10 +59,11 @@ class HostSerializer(serializers.Serializer):
     response_time = serializers.SerializerMethodField()
     super_host = serializers.BooleanField(source='profile.superhost')
     profile_pic = serializers.CharField(source='profile.profile_picture')
+    phone = serializers.CharField(source='profile.phone')
     class Meta:
         model = User
-        fields = ['host_id', 'name', 'email', 'response_rate', 'response_time', 'super_host', 'profile_pic']
-    
+        fields = ['host_id', 'name', 'email', 'response_rate', 'response_time', 'super_host', 'profile_pic', 'email', 'phone']
+
     def get_response_rate(self, obj):
         return "100%"
     

@@ -95,13 +95,24 @@ WSGI_APPLICATION = 'HostService.wsgi.application'
 #     }
 # }
 # APPEND_SLASH = False
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres.kkkridwaybvihynzddyf',
+#         'PASSWORD': 'stayNest12@12',
+#         'HOST': 'aws-0-us-west-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
+#         'PORT': '6543',        # Default PostgreSQL port
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres.lqbmerybmcfengklzoqx',
-        'PASSWORD':'Rafi09876@54321',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
+        'USER': 'postgres.hkerlxohmvgcznppzses',
+        'PASSWORD': 'stayNest12@12',
+        'HOST': 'aws-0-us-west-1.pooler.supabase.com',   # Set to the host where your PostgreSQL server is running
         'PORT': '5432',        # Default PostgreSQL port
     }
 }

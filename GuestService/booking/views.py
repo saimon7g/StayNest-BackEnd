@@ -20,6 +20,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.decorators import api_view
 
+def getUidFromToken(request):
+    token = request.headers.get('Authorization')
+    if token and token.startswith('Token '):
+        token = token.split(' ')[1]
+        user = User.objects.get(auth_token=token)
+        if user:
+            return user.id
+    return -1
+    
+
 @api_view(['GET'])
 def get_reservation(request, reservation_id):
     try:
@@ -192,16 +202,23 @@ def payment_with_id_view(request, booking_id, payment_id):
     return Response({"message": f"Payment with ID {payment_id} retrieved/updated/deleted successfully for booking {booking_id}"}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def upcoming_bookings(request):
+def upcoming_bookings_as_guest(request):
     if request.method == 'GET':
-        # Get the current date
         current_date = date.today()
 
-        # Query upcoming bookings with start_date greater than current date
-        upcoming_bookings = Booking.objects.filter(start_date__gt=current_date)
+        upcoming_bookings_as_guest = Booking.objects.filter(start_date__gt=current_date)
 
-        # Serialize the upcoming bookings
-        serializer = UpcomingBookingsSerializer(upcoming_bookings, many=True)
+        serializer = UpcomingBookingsSerializer(upcoming_bookings_as_guest, many=True)
 
-        # Return the serialized data in the response
+        return Response(serializer.data)
+    
+@api_view(['GET'])
+def upcoming_bookings_as_host(request):
+    if request.method == 'GET':
+        current_date = date.today()
+
+        upcoming_bookings_as_host = Booking.objects.filter(end_date__gt=current_date)
+
+        serializer = UpcomingBookingsSerializer(upcoming_bookings_as_host, many=True)
+
         return Response(serializer.data)

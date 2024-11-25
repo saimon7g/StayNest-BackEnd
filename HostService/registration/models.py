@@ -13,6 +13,12 @@ class Location(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     selected_location = models.CharField(max_length=255)
+    house_name=models.CharField(default='Emtiaz villa')
+    holding_number=models.CharField(null=True)
+    flat_number=models.CharField(null=True)
+    road_number=models.CharField(null=True)
+    area_details=models.CharField(default='Chandpur Ilisher Gher')
+
 
 class SomeBasics(models.Model):
     number_of_guests = models.IntegerField()
@@ -28,6 +34,7 @@ class PropertyRegistration(models.Model):
 
     registration_id = models.BigAutoField(primary_key=True)
     property_type = models.CharField(max_length=255)
+    online_type=models.CharField(max_length=255,default='Standard')
     property_sub_type = models.CharField(max_length=255)
     location = models.ForeignKey(Location, on_delete=models.CASCADE,related_name='Location')
     some_basics = models.ForeignKey(SomeBasics, on_delete=models.CASCADE,related_name='SomeBasics')
