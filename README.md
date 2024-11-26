@@ -168,3 +168,105 @@ The system is designed to be deployed as separate microservices, each handling s
 AWS for hosting
 Supabase for database
 CORS enabled for frontend integration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Here's a combined summary of the StayNest property rental platform:
+StayNest is a full-stack property rental platform offering multiple accommodation types (standard stays, meal-inclusive packages, and paying guest arrangements) with sophisticated booking and negotiation features.
+Architecture:
+
+Frontend: Next.js 13+ with App Router, using Tailwind CSS and Flowbite React
+Backend: Django REST Framework-based microservices (Host, Guest, API Gateway, Negotiation)
+Database: PostgreSQL (Supabase)
+Deployment: AWS
+
+Key Features:
+
+Property Management
+
+
+Multi-step registration process
+Location/amenities management
+Availability calendar
+Dynamic pricing
+
+
+Booking System
+
+
+Real-time availability checking
+Multiple accommodation types
+Meal planning integration
+Status tracking
+
+
+User Features
+
+
+Role-based access (Host/Guest)
+Profile management
+Document verification
+Booking/hosting history
+
+
+Technical Features
+
+
+Token-based authentication
+Map integration (MapTiler SDK)
+Real-time negotiations
+Secure payment processing
+Responsive design
+API Gateway for service orchestration
+
+The system follows a microservices architecture with separate frontend and backend codebases, enabling scalable and maintainable development while providing comprehensive property rental functionality for both hosts and guests.
