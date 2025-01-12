@@ -35,7 +35,6 @@ The backend is structured into several microservices:
 - **Database:** PostgreSQL (Supabase)
 - **Authentication:** Token-based authentication
 - **API Documentation:** REST API
-- **Deployment:** AWS
 - **Additional Tools:**
   - django-cors-headers
   - psycopg2-binary
